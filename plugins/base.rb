@@ -1,8 +1,7 @@
 module CataBot
   class BaseApp < Web::App
-    get '/version' do
-      reply_ok({version: CataBot::VERSION})
-    end
+    get '/version' do reply_ok({version: CataBot::VERSION}) end
+    get '/plugins' do reply_ok({plugins: CataBot.config['plugins']}) end
   end
   Web.mount('/', BaseApp)
 
