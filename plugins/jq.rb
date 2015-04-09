@@ -5,6 +5,7 @@ module CataBot
       GLOB = File.join(CataBot.config['cata'], 'data', 'json', '**/*.json')
       JQ_BIN = '/usr/bin/jq'
       LIMIT = 5
+      GROUPS = %w{null [] {} true false 0}
 
       class App < Web::App
         @@results = Hash.new
@@ -33,28 +34,46 @@ module CataBot
             @@id
           end
 
-          results = Array.new
+          results = {'main' => Array.new, 'exceptions' => Array.new}
           begin
             Dir.glob(File.expand_path(GLOB)) do |p|
               io = IO.popen([JQ_BIN, query, p, :err=>[:child,:out]])
-              res = io.read
-              results.push("#{p}:\n#{res}") if res != '[]'
+              output = io.read
+              head = output.lines.first.chop
+              if GROUPS.member? head
+                results[head] ||= Array.new
+                results[head].push(p)
+              else
+                results['main'].push("#{p}:\n#{output}")
+              end
             end
           rescue StandardError => e
             CataBot.log :error, "Something went wrong with jq query '#{query}' from '#{m.user.mask}' at #{e.backtrace.first}"
-            results.push('Sorry, something went wrong...')
+            results['exceptions'].push('Sorry, something went wrong...')
           end
 
           @@results[id.to_s] = {data: results, stamp: Time.now}
-          url = "#{CataBot.config['web']['url']}/jq/q/#{id}"
+          url = "#{CataBot.config['web']['url']}/jq/#{id}"
           @@mutex.synchronize { @@queries.delete(m.user.mask) }
           m.reply "Done, have a look at #{url}", true
         end
 
-        get '/q/:id' do
+        get '/:id' do
           id = params['id']
           if @@results.has_key? id
-            reply(@@results[id][:data], 200, {'Content-Type' => 'text/plain'})
+            data = @@results[id][:data]
+            text = String.new
+            if data['main'].any?
+              text += data.delete('main').join("\n")
+            else
+              text += 'No general results.'
+            end
+            text += "\n\n"
+            data.each_pair do |g, d|
+              text += "Resulted in '#{g}':\n"
+              text += d.join("\n")
+            end
+            reply(text, 200, {'Content-Type' => 'text/plain'})
           else
             reply_err('Not found.')
           end
