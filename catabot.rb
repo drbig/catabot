@@ -1,24 +1,24 @@
 #!/usr/bin/env ruby
 
-require 'logger'
 require 'json'
 require 'yaml'
 
 require 'cinch'
+require 'cinch/logger/formatted_logger'
 require 'eldr'
 require 'dm-core'
 require 'rack'
 require 'thin'
 
 module CataBot
-  VERSION = '0.0.2'
+  VERSION = '0.0.3'
 
   class Error < StandardError; end
 
   @@config = Hash.new
   def self.config; @@config; end
   def self.config=(obj); @@config = obj; end
-  def self.log(level, &blk); @@config[:logger].send(level, &blk) if @@config[:logger]; end
+  def self.log(level, msg); @@config[:logger].send(level, msg) if @@config[:logger]; end
 
   module IRC
     @@cmds = Hash.new
@@ -37,17 +37,41 @@ module CataBot
       @@mounts[root] = app
     end
 
-    @@apps = Hash.new
-    def self.apps; @@apps; end
-    def self.apps=(obj); @@apps = obj; end
+    class Logging
+      def initialize(app)
+        @app = app
+      end
+
+      def call(env)
+        start = Time.now
+        status, header, body = @app.call(env)
+        log(env, status, header, start)
+        [status, header, body]
+      end
+
+      private
+      def log(env, status, header, start)
+        msg = 'Web: %s %s %s%s %s %s %s %0.4f' % [
+          env['HTTP_X_FORWARDED_FOR'] || env["REMOTE_ADDR"] || "-",
+          env['REQUEST_METHOD'],
+          env['PATH_INFO'],
+          env['QUERY_STRING'].empty? ? '' : '?'+env['QUERY_STRING'],
+          env['HTTP_VERSION'],
+          status.to_s[0..3],
+          header['Content-Length'] || '-',
+          Time.now - start]
+        CataBot.log :info, msg
+      end
+    end
 
     class App < Eldr::App
+      use Logging
+      use Rack::ContentLength
+
       def reply_ok(data); reply({success: true, data: data}.to_json); end
       def reply_err(msg); reply({success: false, error: msg}.to_json); end
-      
-      private
-      def reply(data, status = 200)
-        Rack::Response.new(data, status, {'Content-Type' => 'application/json'})
+      def reply(data, status = 200, header)
+        Rack::Response.new(data, status, {'Content-Type' => 'application/json'}.merge(header))
       end
     end
   end
@@ -55,29 +79,19 @@ module CataBot
   def self.fire!
     c = @@config
 
-    lt = if lf = c['runtime']['logging']['file'] =='stdout'
+    lf = c['runtime']['logging']['file']
+    lt = if lf == 'stdout'
            STDERR.reopen(STDOUT)
            STDOUT
          else
            File.open(File.expand_path(lf), 'a')
          end
-    lt.sync = true if c['runtime']['logging']['sync']
-    lg = if ro = c['runtime']['logging']['rotate']
-           Logger.new(lt, *ro)
-         else
-           Logger.new(lt)
-         end
-    lg.level = Logger.const_get(c['runtime']['logging']['level'].upcase)
-    lg.formatter = if c['runtime']['logging']['stamp']
-                     lambda do |s,d,p,m|
-                       "#{Time.now.strftime('%Y-%m-%d %H:%M:%S.%3N')} | #{s.ljust(5)} | #{m}\n"
-                     end
-                   else
-                     lambda {|s,d,p,m| "#{s.ljust(5)} | #{m}\n" }
-                   end
+    lt.sync = true
+    lg = Cinch::Logger::FormattedLogger.new(lt)
+    lg.level = c['runtime']['logging']['level'].to_sym
     @@config[:logger] = lg
 
-    self.log(:info) { 'Setting up database...'}
+    self.log :info, 'Setting up database...'
     DataMapper.finalize
     DataMapper.setup(:default, c['database'])
     if m = c['database'].match(/sqlite:\/\/(.*?)/) # TODO: broken?
@@ -88,18 +102,17 @@ module CataBot
       end
     end
 
-    self.log(:debug) { 'Loading IRC code...' }
+    self.log :debug, 'Loading IRC code...'
     c['plugins'].each {|p| require_relative File.join('plugins', "#{p.downcase}.rb") }
 
-    self.log(:info) { 'Configuring web backend...' }
+    self.log :info, 'Configuring web backend...'
     app = Rack::Builder.new do
       CataBot::Web.mounts.each_pair do |r, a|
-        ap = CataBot::Web.apps[a.to_s] = a.new
-        map r do run ap end
+        map r do run a.new end
       end
     end.to_app
 
-    self.log(:info) { 'Configuring IRC bot...' }
+    self.log :info, 'Configuring IRC bot...'
     bot = Cinch::Bot.new do
       configure do |b|
         b.nick      = c['irc']['nick']
@@ -108,23 +121,25 @@ module CataBot
         b.server    = c['irc']['server']
         b.channels  = c['irc']['channels']
 
-        b.plugins.plugins = c['plugins'].map {|p| CataBot.const_get(p + 'Plugin') }
+        b.plugins.plugins = c['plugins'].map {|p| CataBot::Plugin.const_get(p).const_get('IRC') }
       end
     end
+    bot.loggers.clear
+    bot.loggers << lg
 
-    self.log(:info) { 'Starting Web backend...' }
+    self.log :info, 'Starting Web backend...'
     web = Thread.new do
-      Rack::Handler::Thin.run(app, {
-        :Host => c['web']['host'] || '127.0.0.1',
-        :Port => c['web']['port'] || 8080,
-      })
+      host = c['web']['host'] || '127.0.0.1'
+      port = c['web']['port'] || 8080
+      c['web']['url'] = "http://#{host}:#{port}"
+      Rack::Handler::Thin.run(app, {:Host => host, :Port => port})
     end
 
-    self.log(:info) { 'Starting IRC bot...' }
+    self.log :info, 'Starting IRC bot...'
     irc = Thread.new { bot.start }
 
     web.join
-    self.log(:debug) { 'Web thread ended...' }
+    self.log :debug, 'Web thread ended...'
   end
 end
 
@@ -147,8 +162,8 @@ begin
   end
 rescue StandardError => e
   msg = "Runtime error: #{e.to_s} at #{e.backtrace.first}."
-  CataBot.log(:fatal) { msg }
-  CataBot.log(:debug) { e.backtrace.join("\n") }
+  CataBot.log :error, msg 
+  CataBot.log :exception, e
   STDERR.puts msg
   exit(3)
 end
