@@ -42,12 +42,11 @@ module CataBot
           m.reply "I can reply to: #{CataBot::IRC.cmds.keys.join(', ')}", true
         end
 
-        CataBot::IRC.cmd('help [command]', 'Describes the given command')
         match /help (\w+)/, method: :help_cmd
         def help_cmd(m, arg)
           cmd = arg.downcase
           if CataBot::IRC.cmds.has_key? cmd
-            m.reply "\"#{cmd}\": #{CataBot::IRC.cmds[cmd]}", true
+            m.reply "\"#{cmd}\" - #{CataBot::IRC.cmds[cmd]}", true
           else
             m.reply 'I don\'t know this command', true
           end
