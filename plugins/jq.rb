@@ -45,7 +45,7 @@ module CataBot
           id = @@mutex.synchronize do
             @@id += 1
             @@queries[m.user.mask] = true
-            @@id
+            @@id.to_s
           end
 
           exceptions = Array.new
@@ -74,12 +74,23 @@ module CataBot
           html = TEMPLATE.render(self, {query: query, results: results, started: started, exceptions: exceptions, ver: Jq.cata_ver})
 
           @@mutex.synchronize do
-            @@results[id.to_s] = {html: html, stamp: Time.now}
+            @@results[id] = {id: id, html: html, stamp: Time.now, by: m.user, query: query}
             @@queries.delete(m.user.mask)
           end
 
           url = "#{CataBot.config['web']['url']}/jq/#{id}"
           m.reply "Done, have a look at #{url}", true
+        end
+
+        def self.results
+          if @@results.any?
+            res = @@results.values.sort {|a,b| b[:stamp] <=> a[:stamp] }.slice(0, 5).map do |r|
+              "#{r[:id]}: \"#{r[:query]}\""
+            end
+            "Last results: #{res.join(', ')}"
+          else
+            'No results in my memory'
+          end
         end
 
         get '/:id' do
@@ -115,15 +126,17 @@ module CataBot
         include Cinch::Plugin
         set :prefix, /#{CataBot.config['irc']['nick']}.? /i
 
-        CataBot::IRC.cmd('jq', 'Issue a jq command. See "jq help".')
+        CataBot::IRC.cmd('jq', 'Issue a jq command. See "jq help"')
         match /jq (\w+) ?(.*)?$/, method: :jq
         def jq(m, cmd, rest)
           case cmd
           when 'help'
-            m.reply 'Can do: jq version, jq query [query].', true
+            m.reply 'Can do: jq version, jq query [query], jq last', true
           when 'version'
             jver = `#{JQ} --version`.chop
-            m.reply "You can run #{jver} queries against #{Jq.cata_ver}.", true
+            m.reply "You can run #{jver} queries against #{Jq.cata_ver}", true
+          when 'last'
+            m.reply App.results, true
           when 'query'
             ok, msg = App.can_query?(m.user)
             unless ok

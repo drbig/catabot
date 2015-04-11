@@ -24,32 +24,32 @@ module CataBot
           User('Nickserv').send("IDENTIFY #{CataBot.config['irc']['pass']}")
         end
 
-        CataBot::IRC.cmd('version', 'Tells you the version.')
+        CataBot::IRC.cmd('version', 'Tells you the version')
         match /version$/, method: :version
         def version(m)
-          m.reply "I'm Catabot v#{CataBot::VERSION}.", true
+          m.reply "I'm Catabot v#{CataBot::VERSION}", true
         end
 
-        CataBot::IRC.cmd('plugins', 'Tells you what plugins are loaded.')
+        CataBot::IRC.cmd('plugins', 'Tells you what plugins are loaded')
         match /plugins$/, method: :plugins
         def plugins(m)
-          m.reply "I have loaded: #{CataBot.config['plugins'].join(', ')}.", true
+          m.reply "I have loaded: #{CataBot.config['plugins'].join(', ')}", true
         end
 
-        CataBot::IRC.cmd('help', 'Tells you what commands are available.')
+        CataBot::IRC.cmd('help', 'Tells you what commands are available')
         match /help$/, method: :help_all
         def help_all(m)
-          m.reply "I can reply to: #{CataBot::IRC.cmds.keys.join(', ')}.", true
+          m.reply "I can reply to: #{CataBot::IRC.cmds.keys.join(', ')}", true
         end
 
-        CataBot::IRC.cmd('help [command]', 'Describes the given command.')
+        CataBot::IRC.cmd('help [command]', 'Describes the given command')
         match /help (\w+)/, method: :help_cmd
         def help_cmd(m, arg)
           cmd = arg.downcase
           if CataBot::IRC.cmds.has_key? cmd
-            m.reply "'#{cmd}': #{CataBot::IRC.cmds[cmd]}", true
+            m.reply "\"#{cmd}\": #{CataBot::IRC.cmds[cmd]}", true
           else
-            m.reply 'I don\'t know this command.', true
+            m.reply 'I don\'t know this command', true
           end
         end
       end
