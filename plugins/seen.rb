@@ -30,7 +30,7 @@ module CataBot
 
         match /seen$/, method: :seen_help
         def seen_help
-          m.reply "Ask me \"seen [nick]\"", true
+          m.reply 'Ask me "seen [nick]"', true
         end
 
         CataBot::IRC.cmd('seen', 'Check last known presence of [nick]')

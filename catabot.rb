@@ -77,7 +77,7 @@ module CataBot
 
       def reply_ok(data); reply({success: true, data: data}.to_json); end
       def reply_err(msg); reply({success: false, error: msg}.to_json); end
-      def reply(data, status = 200, header)
+      def reply(data, status = 200, header = {})
         Rack::Response.new(data, status, {'Content-Type' => 'application/json'}.merge(header))
       end
     end
@@ -98,22 +98,22 @@ module CataBot
     lg.level = c['runtime']['logging']['level'].to_sym
     @@config[:logger] = lg
 
+    self.log :debug, 'Loading plugins...'
+    c['plugins'].each do |p|
+      fname = "#{p.downcase}.rb"
+      self.log :debug, "Loading '#{fname}'..."
+      require_relative File.join('plugins', fname)
+    end
+
     self.log :info, 'Setting up database...'
     DataMapper.finalize
     DataMapper.setup(:default, c['database'])
-    if m = c['database'].match(/sqlite:\/\/(.*?)/) # TODO: broken?
+    if m = c['database'].match(/sqlite:\/\/(.*?)/) # TODO: this has to be temporary
       p = m.captures.first
       unless File.exists? p
         require 'dm-migrations'
         DataMapper.auto_migrate!
       end
-    end
-
-    self.log :debug, 'Loading IRC code...'
-    c['plugins'].each do |p|
-      fname = "#{p.downcase}.rb"
-      self.log :debug, "Loading '#{fname}'..."
-      require_relative File.join('plugins', fname)
     end
 
     self.log :info, 'Configuring web backend...'
