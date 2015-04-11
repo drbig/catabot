@@ -31,7 +31,14 @@ module CataBot
         listen_to :message, method: :input
         def input(m)
           URI.extract(m.message).each do |url|
-            uri = URI.parse(url)
+            begin
+              uri = URI.parse(url)
+            rescue StandardError => e
+              CataBot.log :warn, "Links: Rejected '#{url}' on parsing"
+              CataBot.log :exception, e
+              next
+            end
+
             unless SCHEMES.member? uri.scheme
               CataBot.log :warn, "Links: Ditching #{url} due to bad scheme"
               next
