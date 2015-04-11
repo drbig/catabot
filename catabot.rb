@@ -20,11 +20,18 @@ module CataBot
   def self.config=(obj); @@config = obj; end
   def self.log(level, msg); @@config[:logger].send(level, msg) if @@config[:logger]; end
 
+  @@threads = Hash.new
+  def self.add_thread(id, &blk)
+    raise Error, "Thread '#{id}' already defined." if @@threads.has_key? id
+    raise Error, 'No block given.' if blk.nil?
+    @@threads[id] = {block: blk, thread: nil}
+  end
+
   module IRC
     @@cmds = Hash.new
     def self.cmds; @@cmds; end
     def self.cmd(name, desc)
-      raise Error, "IRC Command '#{name}' already registered." if @@cmds.has_key? name
+      raise Error, "IRC Command '#{name}' already defined." if @@cmds.has_key? name
       @@cmds[name] = desc
     end
   end
@@ -138,8 +145,24 @@ module CataBot
     self.log :info, 'Starting IRC bot...'
     irc = Thread.new { bot.start }
 
+    if @@threads.any?
+      self.log :info, 'Starting auxillary threads...'
+      @@threads.each_pair do |k, v|
+        self.log :debug, "Starting '#{k}'..."
+        v[:thread] = Thread.new { v[:block].call }
+      end
+    end
+
     web.join
     self.log :debug, 'Web thread ended...'
+
+    if @@threads.any?
+      self.log :info, 'Stopping auxillary threads...'
+      @@threads.each_pair do |k, v|
+        self.log :debug, "Stopping '#{k}'..."
+        Thread.kill(v[:thread])
+      end
+    end
   end
 end
 
