@@ -1,9 +1,10 @@
 require 'chronic'
+require 'haml'
 
 module CataBot
   module Plugin
     module Jq
-      VERSION = '0.0.2'
+      VERSION = '0.0.4'
 
       BASEDIR = File.expand_path(CataBot.config['cata'])
       JSONDIR = File.join(BASEDIR, 'data', 'json')
@@ -11,7 +12,12 @@ module CataBot
       GIT = File.expand_path(CataBot.config['params']['jq']['git_bin'])
       LIMIT = CataBot.config['params']['jq']['limit']
       EXPIRE = CataBot.config['params']['jq']['expire']
+      TEMPLATE = Haml::Engine.new(File.read('data/jq/result.haml'))
       GROUPS = %w{null [] {} true false 0}
+
+      def self.cata_ver
+        `cd #{BASEDIR}; #{GIT} describe --tags --always --dirty`.chop
+      end
 
       class App < Web::App
         @@results = Hash.new
@@ -34,7 +40,7 @@ module CataBot
         end
 
         def self.query(m, query)
-          at = Time.now
+          started = Time.now
 
           id = @@mutex.synchronize do
             @@id += 1
@@ -43,19 +49,20 @@ module CataBot
           end
 
           exceptions = Array.new
-          results = {'main' => Array.new}
+          results = {'main' => Hash.new}
           Dir.chdir(JSONDIR)
           Dir.glob('**/*.json') do |p|
             begin
-              fname = 
               io = IO.popen([JQ, query, p, :err=>[:child,:out]])
               output = io.read
-              head = output.lines.first.chop
-              if GROUPS.member? head
-                results[head] ||= Array.new
-                results[head].push(p)
-              else
-                results['main'].push("#{p}:\n#{output}")
+              unless output.empty?
+                head = output.lines.first.chop
+                if GROUPS.member? head
+                  results[head] ||= Array.new
+                  results[head].push(p)
+                else
+                  results['main'][p] = output
+                end
               end
             rescue StandardError => e
               CataBot.log :error, "Something went wrong with jq query '#{query}' for #{p} from '#{m.user.mask}'"
@@ -64,27 +71,10 @@ module CataBot
             end
           end
 
-          text = "Results for query \"#{query}\"\n\n"
-          if results['main'].any?
-            text += results.delete('main').join("\n")
-          else
-            text += 'No general results.'
-          end
-          text += "\n\n"
-          results.each_pair do |g, d|
-            text += "Resulted in \"#{g}\":\n"
-            text += d.join("\n")
-            text += "\n"
-          end
-          if exceptions.any?
-            text += "I had problems processing these files:\n"
-            text += exceptions.join("\n")
-            text += "\n"
-          end
-          text += "Processing took #{Time.now - at} seconds."
+          html = TEMPLATE.render(self, {query: query, results: results, started: started, exceptions: exceptions, ver: Jq.cata_ver})
 
           @@mutex.synchronize do
-            @@results[id.to_s] = {text: text, stamp: Time.now}
+            @@results[id.to_s] = {html: html, stamp: Time.now}
             @@queries.delete(m.user.mask)
           end
 
@@ -96,7 +86,7 @@ module CataBot
           id = params['id']
           @@mutex.synchronize do
             if @@results.has_key? id
-              reply(@@results[id][:text], 200, {'Content-Type' => 'text/plain'})
+              reply(@@results[id][:html], 200, {'Content-Type' => 'text/html'})
             else
               reply_err('Not found.')
             end
@@ -133,8 +123,7 @@ module CataBot
             m.reply 'Can do: jq version, jq query [query].', true
           when 'version'
             jver = `#{JQ} --version`.chop
-            cver = `cd #{BASEDIR}; #{GIT} describe --tags --always --dirty`.chop
-            m.reply "You can run #{jver} queries against #{cver}.", true
+            m.reply "You can run #{jver} queries against #{Jq.cata_ver}.", true
           when 'query'
             ok, msg = App.can_query?(m.user)
             unless ok

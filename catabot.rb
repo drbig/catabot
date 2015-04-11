@@ -5,13 +5,13 @@ require 'yaml'
 
 require 'cinch'
 require 'cinch/logger/formatted_logger'
-require 'eldr'
 require 'dm-core'
+require 'eldr'
 require 'rack'
 require 'thin'
 
 module CataBot
-  VERSION = '0.0.3'
+  VERSION = '0.0.4'
 
   class Error < StandardError; end
 
@@ -110,7 +110,11 @@ module CataBot
     end
 
     self.log :debug, 'Loading IRC code...'
-    c['plugins'].each {|p| require_relative File.join('plugins', "#{p.downcase}.rb") }
+    c['plugins'].each do |p|
+      fname = "#{p.downcase}.rb"
+      self.log :debug, "Loading '#{fname}'..."
+      require_relative File.join('plugins', fname)
+    end
 
     self.log :info, 'Configuring web backend...'
     app = Rack::Builder.new do

@@ -1,0 +1,53 @@
+!!!
+%html{:lang => "en"}
+  %head
+    %meta{:charset => "utf-8"}/
+    %title JQ query results
+    %link{:rel => "stylesheet", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"}/
+    %link{:rel => "stylesheet", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css"}/
+  %body
+    .container
+      %h3= query
+      %small against #{ver}
+      %hr
+      - if results['main'].any?
+        %table.table.table-striped
+          %thead
+            %tr
+              %th File
+              %th Output
+          %tbody
+            - results.delete('main').each_pair do |f, o|
+              %tr
+                %td= f
+                %td
+                  %pre= o
+      - else
+        - results.delete('main')
+        %h4 No general results.
+      %hr
+      - results.each_pair do |g, f|
+        %h4 Resulted in "#{g}"
+        %table.table.table-striped
+          %thead
+            %tr
+              %th File
+          %tbody
+            - f.each do |p|
+              %tr
+                %td= p
+        %hr
+      - if exceptions.any?
+        %h4 Resulted in internal errors:
+        %table.table.table-striped
+          %thead
+            %tr
+              %th File
+          %tbody
+            - exceptions.each do |p|
+              %tr
+                %td= p
+        %hr
+      %small
+        Data compilation took #{Time.now - started} seconds.
+        Made possible with Catabot #{CataBot::VERSION}.
