@@ -5,7 +5,7 @@ require 'nokogiri'
 module CataBot
   module Plugin
     module Links
-      VERSION = '0.0.2'
+      VERSION = '0.0.3'
 
       SCHEMES = %w{http https ftp ftps}
 
@@ -30,8 +30,8 @@ module CataBot
 
         listen_to :message, method: :input
         def input(m)
-          return unless m.message.match(/\w+:\/\/.*?/)
           URI.extract(m.message).each do |url|
+            next unless url.match(/\w+:\/\/.*?/)
             begin
               uri = URI.parse(url)
             rescue StandardError => e
@@ -80,7 +80,7 @@ module CataBot
           if links.any?
             m.reply 'Recent links:', true
             links.each_with_index do |l, i|
-              m.reply "#{i}. #{l.url}", true
+              m.reply "#{i+1}. #{l.url}", true
             end
           else
             m.reply 'Don\'t have any links on record', true
