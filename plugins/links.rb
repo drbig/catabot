@@ -12,16 +12,16 @@ module CataBot
       class Link
         include DataMapper::Resource
 
-        property :url, String, :key => true
-        property :channel, String, :length => 1..64, :required => true
-        property :user, String, :length => 1..128, :required => true
-        property :stamp, Time, :default => Proc.new { Time.now }, :required => true
+        property :url, String, key: true
+        property :channel, String, length: 1..64, required: true
+        property :user, String, length: 1..128, required: true
+        property :stamp, Time, default: Proc.new { Time.now }, required: true
 
-        property :header, Boolean, :default => false
-        property :type, String
+        property :header, Boolean, default: false
+        property :type, String, length: 1..128
         property :size, Integer
-        property :filename, String
-        property :title, String
+        property :filename, String, length: 1..512
+        property :title, String, length: 1..512
       end
 
       class IRC
@@ -57,11 +57,13 @@ module CataBot
                   resp = Net::HTTP.get_response(uri)
                   title = resp['content-type'].match(/text\/html/) \
                     ? Nokogiri.parse(resp.body).title : nil
-                  entry.update(:header => true,
+                  unless entry.update(:header => true,
                                :type => resp['content-type'],
                                :size => resp['content-length'],
                                :filename => resp['content-disposition'],
                                :title => title)
+                    CataBot.log :error, "Links: Error updating details for #{url}!"
+                  end
                 rescue Exception => e
                   CataBot.log :warn, "Links: HTTP GET failed for #{url}"
                   CataBot.log :exception, e
