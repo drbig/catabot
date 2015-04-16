@@ -111,6 +111,7 @@ module CataBot
     if m = c['database'].match(/sqlite:\/\/(.*?)/) # TODO: this has to be temporary
       p = m.captures.first
       unless File.exists? p
+        self.log :info, 'Migrating database...'
         require 'dm-migrations'
         DataMapper.auto_migrate!
       end
