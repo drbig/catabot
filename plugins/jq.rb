@@ -68,6 +68,8 @@ module CataBot
               CataBot.log :error, "Something went wrong with jq query '#{query}' for #{p} from '#{m.user.mask}'"
               CataBot.log :exception, e
               exceptions.push(p)
+            ensure
+              io.close
             end
           end
 

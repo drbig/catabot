@@ -30,6 +30,7 @@ module CataBot
 
         listen_to :message, method: :input
         def input(m)
+          return unless m.message.match(/\w+:\/\/.*?/)
           URI.extract(m.message).each do |url|
             begin
               uri = URI.parse(url)
@@ -40,7 +41,7 @@ module CataBot
             end
 
             unless SCHEMES.member? uri.scheme
-              CataBot.log :warn, "Links: Ditching #{url} due to bad scheme"
+              CataBot.log :warn, "Links: Ditching #{url} due to unsupported scheme"
               next
             end
 
@@ -75,9 +76,12 @@ module CataBot
         def links(m)
           links = Link.all(order: [:stamp.desc], limit: 5)
           if links.any?
-            m.reply "Recent links: #{links.map(&:url).join(' ')}", true
+            m.reply 'Recent links:', true
+            links.each_with_index do |l, i|
+              m.reply "#{i}. #{l.url}", true
+            end
           else
-            m.reply 'Seems I know of no links :/', true
+            m.reply 'Don\'t have any links on record', true
           end
         end
 

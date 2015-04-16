@@ -24,7 +24,7 @@ module CataBot
           @@seen[m.user.nick] = LastSeen.new(:join, m.channel, Time.now)
         end
 
-        listen_to :part, method: :part
+        listen_to :leaving, method: :part
         def part(m)
           CataBot.log :debug, "Seen #{m.user.nick} parting"
           @@seen[m.user.nick] = LastSeen.new(:part, m.channel, Time.now)
