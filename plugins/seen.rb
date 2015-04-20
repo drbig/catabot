@@ -16,9 +16,9 @@ module CataBot
           def to_s
             at = stamp.utc.strftime('%Y-%m-%d %H:%M:%S UTC')
             if action == :joined
-              "Seen joining #{where} at #{at}"
+              "joining #{where} at #{at}"
             else
-              "Seen leaving at #{at}"
+              "leaving at #{at}"
             end
           end
         end
