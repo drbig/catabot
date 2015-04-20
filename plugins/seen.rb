@@ -14,20 +14,25 @@ module CataBot
 
         class LastSeen < Struct.new(:action, :where, :stamp)
           def to_s
-            "#{action}ing channel #{where} at #{stamp.utc.strftime('%Y-%m-%d %H:%M:%S UTC')}"
+            at = stamp.utc.strftime('%Y-%m-%d %H:%M:%S UTC')
+            if action == :joined
+              "Seen joining #{where} at #{at}"
+            else
+              "Seen leaving at #{at}"
+            end
           end
         end
 
         listen_to :join, method: :join
         def join(m)
           CataBot.log :debug, "Seen #{m.user.nick} joining"
-          @@seen[m.user.nick] = LastSeen.new(:join, m.channel, Time.now)
+          @@seen[m.user.nick] = LastSeen.new(:joined, m.channel, Time.now)
         end
 
         listen_to :leaving, method: :leaving
         def leaving(m, user)
           CataBot.log :debug, "Seen #{m.user.nick} leaving"
-          @@seen[m.user.nick] = LastSeen.new(:part, m.channel, Time.now)
+          @@seen[m.user.nick] = LastSeen.new(:left, nil, Time.now)
         end
 
         match /seen$/, method: :seen_help
