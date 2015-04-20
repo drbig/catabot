@@ -1,9 +1,11 @@
+require 'chronic'
+
 module CataBot
   module Plugin
     module Seen
-      VERSION = '0.0.2'
+      VERSION = '0.0.5'
 
-      EXPIRE = CataBot.config['params']['jq']['expire']
+      EXPIRE = CataBot.config['params']['seen']['expire']
 
       class IRC
         include Cinch::Plugin
@@ -54,7 +56,7 @@ module CataBot
 
         CataBot.add_thread :seen_expire do
           loop do
-            sleep(60 * 60)
+            sleep(24 * 60 * 60)
             CataBot.log :debug, 'Running Seen cleaner thread...'
             threshold = Chronic.parse(EXPIRE)
             deleted = 0

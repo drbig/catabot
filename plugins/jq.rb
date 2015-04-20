@@ -4,7 +4,7 @@ require 'haml'
 module CataBot
   module Plugin
     module Jq
-      VERSION = '0.0.4'
+      VERSION = '0.0.5'
 
       BASEDIR = File.expand_path(CataBot.config['cata'])
       JSONDIR = File.join(BASEDIR, 'data', 'json')
@@ -129,7 +129,7 @@ module CataBot
         set :prefix, /#{CataBot.config['irc']['nick']}.? /i
 
         CataBot::IRC.cmd('jq', 'Issue a jq command. See "jq help"')
-        match /jq (\w+) ?(.*)?$/, method: :jq
+        match /jq ?(\w+)? ?(.*)?$/, method: :jq
         def jq(m, cmd, rest)
           case cmd
           when 'help'

@@ -1,0 +1,38 @@
+!!!
+%html{:lang => "en"}
+  %head
+    %meta{:charset => "utf-8"}/
+    %title Last links
+    %link{:rel => "stylesheet", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"}/
+    %link{:rel => "stylesheet", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css"}/
+  %body
+    .container
+      %h3 Last links
+      %hr
+      - if links.any?
+        %table.table.table-striped
+          %thead
+            %tr
+              %th #
+              %th URL (and title)
+              %th Who
+              %th When
+              %th Where
+          %tbody
+            - links.each_with_index do |l, i|
+              %tr
+                %td.center
+                  %b= i+1
+                %td
+                  %a{:href => l.url}= l.url
+                  - if l.title
+                    %br
+                    %small= l.title
+                %td= l.user.split('!').first
+                %td= l.stamp.strftime('%Y-%m-%d %H:%M:%S %Z')
+                %td= l.channel
+      - else
+        %h4 No links on record, yet.
+        %hr
+      %small
+        Made possible with Catabot #{CataBot::VERSION}.

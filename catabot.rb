@@ -11,7 +11,7 @@ require 'rack'
 require 'thin'
 
 module CataBot
-  VERSION = '0.0.4'
+  VERSION = '0.0.5'
 
   class Error < StandardError; end
 

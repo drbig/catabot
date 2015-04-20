@@ -1,7 +1,7 @@
 module CataBot
   module Plugin
     module Base
-      VERSION = '0.0.1'
+      VERSION = '0.0.5'
 
       class App < Web::App
         get '/versions' do
@@ -42,13 +42,13 @@ module CataBot
           m.reply "I can reply to: #{CataBot::IRC.cmds.keys.join(', ')}", true
         end
 
-        match /help (\w+)/, method: :help_cmd
+        match /help (.*)/, method: :help_cmd
         def help_cmd(m, arg)
           cmd = arg.downcase
           if CataBot::IRC.cmds.has_key? cmd
             m.reply "\"#{cmd}\" - #{CataBot::IRC.cmds[cmd]}", true
           else
-            m.reply 'I don\'t know this command', true
+            m.reply 'Can\'t help you with that', true
           end
         end
       end

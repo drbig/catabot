@@ -1,13 +1,15 @@
 require 'net/http'
 require 'uri'
+require 'haml'
 require 'nokogiri'
 
 module CataBot
   module Plugin
     module Links
-      VERSION = '0.0.3'
+      VERSION = '0.0.5'
 
       SCHEMES = %w{http https ftp ftps}
+      TEMPLATE = Haml::Engine.new(File.read('data/links/last.haml'))
 
       class Link
         include DataMapper::Resource
@@ -23,6 +25,15 @@ module CataBot
         property :filename, String, length: 1..512
         property :title, String, length: 1..512
       end
+
+      class App < Web::App
+        get '/last' do
+          links = Link.all(limit: 50, order: [:stamp.desc])
+          html = TEMPLATE.render(self, {links: links})
+          reply(html, 200, {'Content-Type' => 'text/html'})
+        end
+      end
+      Web.mount('/links', App)
 
       class IRC
         include Cinch::Plugin
@@ -73,34 +84,34 @@ module CataBot
           end
         end
 
-        CataBot::IRC.cmd('links', 'Show latest recorded links')
-        match /links$/, method: :links
-        def links(m)
-          links = Link.all(order: [:stamp.desc], limit: 5)
-          if links.any?
-            m.reply 'Recent links:', true
-            links.each_with_index do |l, i|
-              m.reply "#{i+1}. #{l.url}", true
+        CataBot::IRC.cmd('links', 'Ask about links I\'ve seen. See "links help"')
+        match /links ?(\w+)? ?(.*)?$/, method: :links
+        def links(m, cmd, rest)
+          case cmd
+          when 'help'
+            m.reply 'Can do: links recent, links more, links about [link]', true
+          when 'recent'
+            links = Link.all(order: [:stamp.desc], limit: 5)
+            if links.any?
+              m.reply 'Recent links:', true
+              links.each_with_index do |l, i|
+                m.reply "#{i+1}. #{l.url}", true
+              end
+            else
+              m.reply 'Don\'t have any links on record', true
+            end
+          when 'more'
+            url = "#{CataBot.config['web']['url']}/links/last"
+            m.reply "You can see more links here: #{url}", true
+          when 'about'
+            if link = Link.get(rest)
+              m.reply "I've seen #{link.url} first mentioned on #{link.channel} at #{link.stamp.utc.strftime('%Y-%m-%d %H:%M:%S %Z')}", true
+              m.reply "It was entitled \"#{link.title}\"", true if link.title
+            else
+              m.reply 'Don\'t recall such link', true
             end
           else
-            m.reply 'Don\'t have any links on record', true
-          end
-        end
-
-        match /link$/, method: :link_help
-        def link_help(m)
-          m.reply 'Ask me: "link [link]"', true
-        end
-
-        CataBot::IRC.cmd('link', 'Show [link] info')
-        match /link (.*)$/, method: :link
-        def link(m, query)
-          if link = Link.get(query)
-            msg = "I've seen #{link.url} first mentioned on #{link.channel} at #{link.stamp.utc.strftime('%Y-%m-%d %H:%M:%S %Z')}"
-            msg += ", title \"#{link.title}\"" if link.title
-            m.reply msg, true
-          else
-            m.reply 'Don\'t recall such link', true
+            m.reply 'Perhaps ask me "links help"?', true
           end
         end
       end
