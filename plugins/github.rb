@@ -4,7 +4,7 @@ require 'httparty'
 module CataBot
   module Plugin
     module GitHub
-      VERSION = '0.0.2'
+      VERSION = '0.0.4'
 
       AGENT = 'drbig/catabot'
       LIMIT = CataBot.config['params']['github']['limit']
@@ -56,12 +56,20 @@ module CataBot
         def github(m, cmd, rest)
           case cmd
           when 'help'
-            m.reply 'Can do: github recent, github about [number], github search [query]', true
+            m.reply 'Can do: github recent, github link [number], github about [number], github search [query]', true
           when 'recent'
             query(m, "#{URL}/pulls", state: 'closed') do |res|
               m.reply 'Recent merged PRs:', true
               res.slice(0, 3).each do |pr|
                 m.reply "##{pr['number']} \"#{pr['title']}\"", true
+              end
+            end
+          when 'link'
+            unless rm = rest.match(/^#?(\d+)$/)
+              m.reply 'Wrong issue/PR id, use e.g. "github about #1234"', true
+            else
+              query(m, "#{URL}/issues/#{rm.captures.first}") do |res|
+                m.reply "##{res['number']} #{res['html_url']}", true
               end
             end
           when 'about'
