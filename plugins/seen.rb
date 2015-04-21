@@ -37,12 +37,7 @@ module CataBot
           @@seen[m.user.nick] = LastSeen.new(:left, nil, Time.now)
         end
 
-        match /seen$/, method: :seen_help
-        def seen_help
-          m.reply 'Ask me "seen [nick]"', true
-        end
-
-        CataBot::IRC.cmd('seen', 'Check last known presence of [nick]')
+        CataBot::IRC.cmd('seen [nick]', 'Check last known presence of [nick]')
         match /seen (.*)$/, method: :seen
         def seen(m, query)
           @@mutex.synchronize do
