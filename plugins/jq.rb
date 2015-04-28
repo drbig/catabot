@@ -133,7 +133,9 @@ module CataBot
         def jq(m, cmd, rest)
           case cmd
           when 'help'
-            m.reply 'Can do: jq version, jq query [query], jq last', true
+            m.reply 'Can do: jq wtf, jq version, jq query [query], jq last', true
+          when 'wtf'
+            m.reply 'RTFM - http://stedolan.github.io/jq/manual/', true
           when 'version'
             jver = `#{JQ} --version`.chop
             m.reply "You can run #{jver} queries against #{Jq.cata_ver}", true
