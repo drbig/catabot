@@ -21,10 +21,10 @@ module CataBot
   def self.log(level, msg); @@config[:logger].send(level, msg) if @@config[:logger]; end
 
   @@threads = Hash.new
-  def self.add_thread(id, &blk)
+  def self.aux_thread(id, period, &blk)
     raise Error, "Thread '#{id}' already defined." if @@threads.has_key? id
     raise Error, 'No block given.' if blk.nil?
-    @@threads[id] = {block: blk, thread: nil}
+    @@threads[id] = {block: blk, period: period, thread: nil}
   end
 
   module IRC
@@ -154,7 +154,13 @@ module CataBot
       self.log :info, 'Starting auxillary threads...'
       @@threads.each_pair do |k, v|
         self.log :debug, "Starting '#{k}'..."
-        v[:thread] = Thread.new { v[:block].call }
+        v[:thread] = Thread.new do
+          loop do
+            sleep(v[:period])
+            CataBot.log :debug, "Running #{k} aux thread..."
+            v[:block].call
+          end
+        end
       end
     end
 

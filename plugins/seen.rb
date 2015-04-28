@@ -47,20 +47,16 @@ module CataBot
           end
         end
 
-        CataBot.add_thread :seen_expire do
-          loop do
-            sleep(24 * 60 * 60)
-            CataBot.log :debug, 'Running Seen cleaner thread...'
-            threshold = Chronic.parse(EXPIRE)
-            deleted = 0
-            @@seen.each_pair do |k, v|
-              if v[:stamp] < threshold
-                @@mutex.synchronize { @@seen.delete(k) }
-                deleted += 1
-              end
+        CataBot.aux_thread(:seen_expire, 24 * 60 * 60) do
+          threshold = Chronic.parse(EXPIRE)
+          deleted = 0
+          @@seen.each_pair do |k, v|
+            if v[:stamp] < threshold
+              @@mutex.synchronize { @@seen.delete(k) }
+              deleted += 1
             end
-            CataBot.log :debug, "Seen cleaner: #{deleted} deleted, #{@@seen.length} kept"
           end
+          CataBot.log :debug, "Seen cleaner: #{deleted} deleted, #{@@seen.length} kept"
         end
       end
     end

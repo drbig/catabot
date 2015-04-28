@@ -101,26 +101,22 @@ module CataBot
           end
         end
 
-        CataBot.add_thread :memos_expire do
-          loop do
-            sleep(4 * 60 * 60)
-            CataBot.log :debug, 'Running Memo cleaner thread...'
-            threshold = Chronic.parse(EXPIRE)
-            deleted = 0
-            kept = 0
-            @@memos.each_pair do |u, v|
-              v.each do |n|
-                if n.when < threshold
-                  @@mutex.synchronize { v.delete(n) }
-                  deleted += 1
-                else
-                  kept += 1
-                end
-                @@mutex.synchronize { @@memos.delete(u) if v.empty? }
+        CataBot.aux_thread(:memos_expire, 4 * 60 * 60) do
+          threshold = Chronic.parse(EXPIRE)
+          deleted = 0
+          kept = 0
+          @@memos.each_pair do |u, v|
+            v.each do |n|
+              if n.when < threshold
+                @@mutex.synchronize { v.delete(n) }
+                deleted += 1
+              else
+                kept += 1
               end
+              @@mutex.synchronize { @@memos.delete(u) if v.empty? }
             end
-            CataBot.log :debug, "Memo cleaner: #{deleted} deleted, #{kept} kept"
           end
+          CataBot.log :debug, "Memo cleaner: #{deleted} deleted, #{kept} kept"
         end
       end
     end

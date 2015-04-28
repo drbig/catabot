@@ -106,20 +106,16 @@ module CataBot
           end
         end
 
-        CataBot.add_thread :jq_expire do
-          loop do
-            sleep(5 * 60)
-            CataBot.log :debug, 'Running JQ cleaner thread...'
-            threshold = Chronic.parse(EXPIRE)
-            deleted = 0
-            @@results.each_pair do |k, v|
-              if v[:stamp] < threshold
-                @@mutex.synchronize { @@results.delete(k) }
-                deleted += 1
-              end
+        CataBot.aux_thread(:jq_expire, 5 * 60) do
+          threshold = Chronic.parse(EXPIRE)
+          deleted = 0
+          @@results.each_pair do |k, v|
+            if v[:stamp] < threshold
+              @@mutex.synchronize { @@results.delete(k) }
+              deleted += 1
             end
-            CataBot.log :debug, "JQ cleaner: #{deleted} deleted, #{@@results.length} kept"
           end
+          CataBot.log :debug, "JQ cleaner: #{deleted} deleted, #{@@results.length} kept"
         end
       end
       Web.mount('/jq', App)
