@@ -9,8 +9,7 @@ module CataBot
       EXPIRE = CataBot.config['params']['memo']['expire']
 
       class IRC
-        include Cinch::Plugin
-        set :prefix, /#{CataBot.config['irc']['nick']}.? /i
+        include CataBot::IRC::Plugin
 
         @@memos = Hash.new
         @@mutex = Mutex.new
@@ -37,8 +36,7 @@ module CataBot
           end
         end
 
-        CataBot::IRC.cmd('memo', 'Leave a note for another user. See "memo help"')
-        match /memo ?(\w+)? ?(.*)$/, method: :memo
+        command(:memo, /memo ?(\w+)? ?(.*)$/, 'memo', 'Leave a note for another user. See "memo help"')
         def memo(m, cmd, rest)
           case cmd
           when 'help'

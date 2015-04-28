@@ -36,10 +36,9 @@ module CataBot
       Web.mount('/links', App)
 
       class IRC
-        include Cinch::Plugin
-        set :prefix, /#{CataBot.config['irc']['nick']}.? /i
+        include CataBot::IRC::Plugin
 
-        listen_to :message, method: :input
+        listen_to :channel, method: :input
         def input(m)
           URI.extract(m.message).each do |url|
             next unless url.match(/\w+:\/\/.*?/)
@@ -84,8 +83,7 @@ module CataBot
           end
         end
 
-        CataBot::IRC.cmd('links', 'Ask about links I\'ve seen. See "links help"')
-        match /links ?(\w+)? ?(.*)?$/, method: :links
+        command(:links, /links ?(\w+)? ?(.*)?$/, 'links', 'Ask about links I\'ve seen. See "links help"')
         def links(m, cmd, rest)
           case cmd
           when 'help'

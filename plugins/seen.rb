@@ -8,8 +8,7 @@ module CataBot
       EXPIRE = CataBot.config['params']['seen']['expire']
 
       class IRC
-        include Cinch::Plugin
-        set :prefix, /#{CataBot.config['irc']['nick']}.? /i
+        include CataBot::IRC::Plugin
 
         @@seen = Hash.new
         @@mutex = Mutex.new
@@ -37,8 +36,7 @@ module CataBot
           @@seen[m.user.nick] = LastSeen.new(:left, nil, Time.now)
         end
 
-        CataBot::IRC.cmd('seen [nick]', 'Check last known presence of [nick]')
-        match /seen (.*)$/, method: :seen
+        command(:seen, /seen (.*)$/, 'seen [nick]', 'Check last known presence of [nick]')
         def seen(m, query)
           @@mutex.synchronize do
             if @@seen.has_key? query

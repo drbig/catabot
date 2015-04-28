@@ -13,8 +13,7 @@ module CataBot
       URL = "#{BASE}/repos/#{REPO}"
 
       class IRC
-        include Cinch::Plugin
-        set :prefix, /#{CataBot.config['irc']['nick']}.? /i
+        include CataBot::IRC::Plugin
 
         @@queries = Hash.new
         @@mutex = Mutex.new
@@ -51,8 +50,7 @@ module CataBot
           end
         end
 
-        CataBot::IRC.cmd('github', 'Query CDDA\'s GitHub repo. See "github help"')
-        match /github ?(\w+)? ?(.*)?$/, method: :github
+        command(:github, /github ?(\w+)? ?(.*)?$/, 'github', 'Query CDDA\'s GitHub repo. See "github help"')
         def github(m, cmd, rest)
           case cmd
           when 'help'

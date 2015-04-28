@@ -125,11 +125,9 @@ module CataBot
       Web.mount('/jq', App)
 
       class IRC
-        include Cinch::Plugin
-        set :prefix, /#{CataBot.config['irc']['nick']}.? /i
+        include CataBot::IRC::Plugin
 
-        CataBot::IRC.cmd('jq', 'Issue a jq command. See "jq help"')
-        match /jq ?(\w+)? ?(.*)?$/, method: :jq
+        command(:jq, /jq ?(\w+)? ?(.*)?$/, 'jq', 'Issue a jq command. See "jq help"')
         def jq(m, cmd, rest)
           case cmd
           when 'help'
