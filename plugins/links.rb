@@ -65,14 +65,23 @@ module CataBot
                 uri = URI.parse(url)
                 begin
                   resp = Net::HTTP.get_response(uri)
-                  title = resp['content-type'].match(/text\/html/) \
-                    ? Nokogiri.parse(resp.body).title : nil
+
+                  title = nil
+                  if resp['content-type'].match(/text\/html/)
+                    begin
+                      title = Nokogiri::HTML.parse(resp.body, nil, 'UTF-8').title
+                    rescue StandardError => e
+                      CataBot.log :warn, "Links: HTML parse failed for #{url}"
+                      CataBot.log :exception, e
+                    end
+                  end
+
                   unless entry.update(:header => true,
                                :type => resp['content-type'],
                                :size => resp['content-length'],
                                :filename => resp['content-disposition'],
                                :title => title)
-                    CataBot.log :error, "Links: Error updating details for #{url}!"
+                    CataBot.log :error, "Links: Error updating details for #{url}"
                   end
                 rescue Exception => e
                   CataBot.log :warn, "Links: HTTP GET failed for #{url}"

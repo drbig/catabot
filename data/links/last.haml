@@ -24,12 +24,16 @@
                 %td.center
                   %b= i+1
                 %td
-                  %a{:href => l.url}= l.url
+                  - if l.url.length > 100
+                    - url_text = l.url.slice(0, 89) + '...' + l.url.slice(-8, 8)
+                  - else
+                    - url_text = l.url
+                  %a{:href => l.url, :target => '_blank'}= url_text
                   - if l.title
                     %br
                     %small= l.title
                 %td= l.user.split('!').first
-                %td= l.stamp.strftime('%Y-%m-%d %H:%M:%S %Z')
+                %td= l.stamp.utc.strftime('%Y-%m-%d %H:%M:%S %Z')
                 %td= l.channel
       - else
         %h4 No links on record, yet.
