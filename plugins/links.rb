@@ -98,7 +98,8 @@ module CataBot
           when 'help'
             m.reply 'Can do: links recent, links more, links about [link]', true
           when 'recent'
-            links = Link.all(order: [:stamp.desc], limit: 5)
+            limit = m.channel? ? 3 : 10
+            links = Link.all(order: [:stamp.desc], limit: limit)
             if links.any?
               m.reply 'Recent links:', true
               links.each_with_index do |l, i|

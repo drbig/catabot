@@ -57,8 +57,9 @@ module CataBot
             m.reply 'Can do: github recent, github link [number], github about [number], github search [query]', true
           when 'recent'
             query(m, "#{URL}/pulls", state: 'closed') do |res|
+              limit = m.channel? ? 3 : 10
               m.reply 'Recent merged PRs:', true
-              res.slice(0, 3).each do |pr|
+              res.slice(0, limit).each do |pr|
                 m.reply "##{pr['number']} \"#{pr['title']}\"", true
               end
             end
@@ -86,8 +87,9 @@ module CataBot
               m.reply 'Please specify some query...', true
             else
               query(m, "#{BASE}/search/issues", q: "repo:#{REPO} #{rest}") do |res|
+                limit = m.channel? ? 3 : 10
                 m.reply "Your query matched #{res['total_count']} issues/PRs, top matches:", true
-                res['items'].slice(0, 3).each do |i|
+                res['items'].slice(0, limit).each do |i|
                   m.reply "##{i['number']} \"#{i['title']}\"", true
                 end
               end
