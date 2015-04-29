@@ -3,7 +3,7 @@ require 'chronic'
 module CataBot
   module Plugin
     module Seen
-      VERSION = '0.0.5'
+      VERSION = '0.1.0'
 
       EXPIRE = CataBot.config['params']['seen']['expire']
 

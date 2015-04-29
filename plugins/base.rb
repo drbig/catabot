@@ -22,7 +22,7 @@ module CataBot
 
   module Plugin
     module Base
-      VERSION = '0.0.5'
+      VERSION = '0.1.0'
 
       class App < Web::App
         get '/versions' do
