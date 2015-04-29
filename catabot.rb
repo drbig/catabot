@@ -125,7 +125,7 @@ module CataBot
     end.to_app
 
     self.log :info, 'Configuring IRC bot...'
-    bot = Cinch::Bot.new do
+    @@bot = Cinch::Bot.new do
       configure do |b|
         b.nick      = c['irc']['nick']
         b.user      = c['irc']['user']
@@ -136,11 +136,11 @@ module CataBot
         b.plugins.plugins = c['plugins'].map {|p| CataBot::Plugin.const_get(p).const_get('IRC') }
       end
     end
-    bot.loggers.clear
-    bot.loggers << lg
+    @@bot.loggers.clear
+    @@bot.loggers << lg
 
     self.log :info, 'Starting Web backend...'
-    web = Thread.new do
+    @@web = Thread.new do
       host = c['web']['host'] || '127.0.0.1'
       port = c['web']['port'] || 8080
       c['web']['url'] = "http://#{host}:#{port}"
@@ -148,7 +148,7 @@ module CataBot
     end
 
     self.log :info, 'Starting IRC bot...'
-    irc = Thread.new { bot.start }
+    @@irc = Thread.new { @@bot.start }
 
     if @@threads.any?
       self.log :info, 'Starting auxillary threads...'
@@ -164,7 +164,7 @@ module CataBot
       end
     end
 
-    web.join
+    @@web.join
     self.log :debug, 'Web thread ended...'
 
     if @@threads.any?
@@ -174,6 +174,13 @@ module CataBot
         Thread.kill(v[:thread])
       end
     end
+  end
+
+  def self.stop!
+    CataBot.log :info, 'Got stop request...'
+    @@bot.quit('Time to leave...')
+    @@irc.join
+    @@web.kill
   end
 end
 

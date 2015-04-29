@@ -1,6 +1,8 @@
 module CataBot
   module IRC
     module Plugin
+      ADMIN = Cinch::Mask.new(CataBot.config['params']['base']['admin'])
+
       def self.included(recv)
         recv.include(Cinch::Plugin)
         recv.set(:prefix, /#{CataBot.config['irc']['nick']}.? /i)
@@ -66,6 +68,11 @@ module CataBot
           else
             m.reply 'Can\'t help you with that', true
           end
+        end
+
+        command(:admin_quit, /quit$/)
+        def admin_quit(m)
+          CataBot.stop! if ADMIN.match(m.user.mask)
         end
       end
     end
