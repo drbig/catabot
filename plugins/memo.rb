@@ -11,28 +11,31 @@ module CataBot
       class IRC
         include CataBot::IRC::Plugin
 
-        @@memos = Hash.new
-        @@mutex = Mutex.new
+        class Note
+          include DataMapper::Resource
 
-        Note = Struct.new(:who, :when, :where, :for, :body)
+          property :id, Serial
+          property :for, String, required: true, length: 1..16
+          property :by, String, required: true, length: 1..16
+          property :channel, String, required: true, length: 1..64
+          property :stamp, DateTime, required: true, default: Proc.new { DateTime.now }
+          property :body, Text, required: true
+        end
 
         def get_pending(m)
-          @@memos.each_value.to_a.flatten.select do |n|
-            n.who == m.user.nick && n.where == m.channel
-          end
+          Note.all(by: m.user.nick, channel: m.channel.to_s)
         end
 
         listen_to :join, method: :join
         def join(m)
-          nick = m.user.nick
-          @@mutex.synchronize do
-            return unless @@memos.has_key? nick
-            @@memos[nick].each do |n|
-              next unless n.where == m.channel
-              m.reply "#{n.who} left a note for you: #{n.body}", true
-              @@memos[nick].delete(n)
+          notes = Note.all(for: m.user.nick)
+          if notes.any?
+            notes.each do |n|
+              m.reply "#{n.by} left a note for you: #{n.body}", true
+              unless n.destroy
+                CataBot.log :error, "Couldn't destroy note: #{n.errors.join(', ')}"
+              end
             end
-            @@memos.delete(nick) if @@memos[nick].empty?
           end
         end
 
@@ -63,37 +66,38 @@ module CataBot
                 return
               end
 
-              notes = get_pending(m)
-              if notes.any? {|n| n.for == to }
+              if Note.all(for: to, by: m.user.nick, channel: m.channel.to_s).any?
                 m.reply "Sorry, you already have a note pending for #{to}. You can always tell me to forget it...", true
                 return
               end
 
-              if @@memos.has_key?(to) && @@memos[to].length > LIMIT
+              if Note.all(for: to).count >= LIMIT
                 m.reply "Sorry, I have already too many notes pending for #{to}. I'm not a spam bot you know...", true
                 return
               end
 
-              @@mutex.synchronize do
-                @@memos[to] ||= Array.new
-                @@memos[to].push(Note.new(m.user.nick, Time.now, m.channel, to, body))
+              note = Note.new(for: to, by: m.user.nick, channel: m.channel, body: body)
+              if note.save 
+                m.reply "Noted down. Will try my best to relay that to #{to}", true
+              else
+                CataBot.log :error, "Couldn't save new note: #{note.errors.join(', ')}"
+                m.reply 'Something went wrong... Sorry', true
               end
-              m.reply "Noted down. Will try my best to relay that to #{to}", true
             end
           when 'forget'
             if rest.empty?
               m.reply 'Wrong format, use e.g. "memo forget dRbiG"', true
             else
-              unless notes = @@memos[rest]
-                m.reply "You haven't left a note for #{rest}", true
-              else
-                note = notes.select {|n| n.who == m.user.nick && n.where == m.channel }
-                unless note && note.any?
-                  m.reply "You haven't left a note for #{rest} here", true
-                else
-                  @@mutex.synchronize { @@memos[rest].delete(note.first) }
+              notes = Note.all(by: m.user.nick, for: rest, channel: m.channel.to_s)
+              if notes.any?
+                if notes.destroy
                   m.reply "Forgot that note for #{rest}", true
+                else
+                  CataBot.log :error, "Couldn't destroy note: #{notes.errors.join(', ')}"
+                  m.reply 'Something went wrong... Sorry', true
                 end
+              else
+                m.reply "You haven't left a note for #{rest}", true
               end
             end
           else
@@ -101,22 +105,19 @@ module CataBot
           end
         end
 
-        CataBot.aux_thread(:memos_expire, 4 * 60 * 60) do
-          threshold = Chronic.parse(EXPIRE)
+        CataBot.aux_thread(:memo_expire, 4 * 60 * 60) do
+          threshold = Chronic.parse(EXPIRE).to_datetime
+          expired = Note.all(:stamp.lt => threshold)
           deleted = 0
-          kept = 0
-          @@memos.each_pair do |u, v|
-            v.each do |n|
-              if n.when < threshold
-                @@mutex.synchronize { v.delete(n) }
-                deleted += 1
-              else
-                kept += 1
-              end
-              @@mutex.synchronize { @@memos.delete(u) if v.empty? }
+
+          if expired.any?
+            deleted = expired.length
+            unless expired.destroy
+              CataBot.log :error, "Couldn't destroy expired memos: #{expired.errors.join(', ')}"
             end
           end
-          CataBot.log :debug, "Memo cleaner: #{deleted} deleted, #{kept} kept"
+
+          CataBot.log :debug, "Memo cleaner: #{deleted} deleted, #{Note.count} kept"
         end
       end
     end
