@@ -77,9 +77,17 @@ module CataBot
             else
               query(m, "#{URL}/issues/#{rm.captures.first}") do |res|
                 type = res.has_key?('pull_request') ? 'PR' : 'Issue'
-                m.reply "##{res['number']} #{res['state']} #{type} by #{res['user']['login']}", true
-                m.reply "title: \"#{res['title']}\"", true
-                m.reply "for more see: #{res['html_url']}", true
+                begin
+                  stamp = Time.parse(res['updated_at']).utc.strftime('%Y-%m-%d %H:%M:%S %Z')
+                  stamp = " (last update: #{stamp})"
+                rescue StandardError => e
+                  stamp = ''
+                  CataBot.log :warn, 'GitHub: Error parsing updated_at'
+                  CataBot.log :exception, e
+                end
+
+                m.reply "##{res['number']} \"#{res['title']}\"", true
+                m.reply "#{res['state']} #{type} by #{res['user']['login']}#{stamp}, #{res['html_url']}", true
               end
             end
           when 'search'
