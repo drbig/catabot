@@ -6,7 +6,7 @@ require 'nokogiri'
 module CataBot
   module Plugin
     module Links
-      VERSION = '0.1.0'
+      VERSION = '0.1.1'
 
       SCHEMES = %w{http https ftp ftps}
       TEMPLATE = Haml::Engine.new(File.read('data/links/last.haml'))
@@ -61,31 +61,30 @@ module CataBot
                 CataBot.log :error, "Links: Error saving entry for #{url}!"
                 return false
               end
-              Thread.new do
-                uri = URI.parse(url)
-                begin
-                  resp = Net::HTTP.get_response(uri)
 
-                  title = nil
-                  if resp['content-type'].match(/text\/html/)
-                    begin
-                      title = Nokogiri::HTML.parse(resp.body, nil, 'UTF-8').title
-                    rescue StandardError => e
-                      CataBot.log :warn, "Links: HTML parse failed for #{url}"
-                      CataBot.log :exception, e
+              Thread.new do
+                res = Array.new
+                title = nil
+                begin
+                  u = URI.parse(url)
+                  Net::HTTP.start(u.host, u.port) do |h|
+                    res = h.head(u.request_uri)
+                    if res['content-type'].match(/text\/html/)
+                      res = h.get(u.request_uri)
+                      title = Nokogiri::HTML.parse(res.body, nil, 'UTF-8').title
                     end
                   end
-
-                  unless entry.update(:header => true,
-                               :type => resp['content-type'],
-                               :size => resp['content-length'],
-                               :filename => resp['content-disposition'],
-                               :title => title)
-                    CataBot.log :error, "Links: Error updating details for #{url}"
-                  end
-                rescue Exception => e
-                  CataBot.log :warn, "Links: HTTP GET failed for #{url}"
+                rescue StandardError => e
+                  CataBot.log :warn, "Links: Error trying to extract more details for #{url}"
                   CataBot.log :exception, e
+                end
+
+                unless entry.update(:header => true,
+                                    :type => res['content-type'],
+                                    :size => res['content-length'],
+                                    :filename => res['content-disposition'],
+                                    :title => title)
+                  CataBot.log :error, "Links: Error updating details for #{url}"
                 end
               end
             end
