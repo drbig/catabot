@@ -6,7 +6,7 @@ require 'nokogiri'
 module CataBot
   module Plugin
     module Links
-      VERSION = '0.1.1'
+      VERSION = '0.1.2'
 
       SCHEMES = %w{http https ftp ftps}
       TEMPLATE = Haml::Engine.new(File.read('data/links/last.haml'))
@@ -55,7 +55,11 @@ module CataBot
               next
             end
 
-            unless Link.get(url)
+            if entry = Link.get(url)
+              unless entry.update(channel: m.channel, user: m.user.mask, stamp: Time.now)
+                CataBot.log :error, "Links: Error updating basic data for #{url}"
+              end
+            else
               entry = Link.new(url: url, channel: m.channel, user: m.user.mask)
               unless entry.save
                 CataBot.log :error, "Links: Error saving entry for #{url}!"
