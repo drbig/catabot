@@ -7,7 +7,16 @@
     %link{:rel => "stylesheet", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css"}/
   %body
     .container
-      %h3 Last links
+      - if chan
+        %h3= "Recent links for '#{chan}'"
+      - else
+        %h3 Recent links
+      %hr
+      %form.form-inline{:method => :get, :action => '#'}
+        .form-group
+          %label{:for => :chan}Channel</label>
+          %input.form-control{:type => :text, :id => :chan, :name => :chan, :placeholder => 'No need for #'}
+          %button.btn.btn-default{:type => :submit} Filter
       %hr
       - if links.any?
         %table.table.table-striped

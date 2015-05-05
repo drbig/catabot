@@ -28,8 +28,16 @@ module CataBot
 
       class App < Web::App
         get '/last' do
-          links = Link.all(limit: 50, order: [:stamp.desc])
-          html = TEMPLATE.render(self, {links: links})
+          limit = params['limit'].to_i rescue 50
+          limit = 50 if limit < 1 || limit > 256
+          chan = params['chan'] || false
+
+          if chan
+            links = Link.all(:limit => limit, :order => [:stamp.desc], :channel.like => "%#{chan}%")
+          else
+            links = Link.all(limit: limit, order: [:stamp.desc])
+          end
+          html = TEMPLATE.render(self, {links: links, chan: chan})
           reply(html, 200, {'Content-Type' => 'text/html'})
         end
       end
