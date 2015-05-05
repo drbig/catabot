@@ -6,10 +6,11 @@ require 'nokogiri'
 module CataBot
   module Plugin
     module Links
-      VERSION = '0.1.4'
+      VERSION = '0.1.5'
 
       SCHEMES = %w{http https ftp ftps}
       TEMPLATE = Haml::Engine.new(File.read('data/links/last.haml'))
+      EXPIRE = CataBot.config['params']['links']['expire']
 
       class Link
         include DataMapper::Resource
@@ -135,6 +136,21 @@ module CataBot
           else
             m.reply 'Perhaps ask me "links help"?', true
           end
+        end
+
+        CataBot.aux_thread(:links_expire, 24 * 60 * 60) do
+          threshold = Chronic.parse(EXPIRE).to_datetime
+          expired = Links.all(:stamp.lt => threshold)
+          deleted = 0
+
+          if expired.any?
+            deleted = expired.length
+            unless expired.destroy
+              CataBot.log :error, "Couldn't destroy expired links: #{expired.errors.join(', ')}"
+            end
+          end
+
+          CataBot.log :debug, "Links cleaner: #{deleted} deleted, #{Links.count} kept"
         end
       end
     end
