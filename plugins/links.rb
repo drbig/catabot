@@ -6,7 +6,7 @@ require 'nokogiri'
 module CataBot
   module Plugin
     module Links
-      VERSION = '0.1.2'
+      VERSION = '0.1.4'
 
       SCHEMES = %w{http https ftp ftps}
       TEMPLATE = Haml::Engine.new(File.read('data/links/last.haml'))
@@ -109,15 +109,18 @@ module CataBot
           when 'help'
             m.reply 'Can do: links recent, links more, links about [link]', true
           when 'recent'
-            limit = m.channel? ? 3 : 10
-            links = Link.all(order: [:stamp.desc], limit: limit)
-            if links.any?
-              m.reply 'Recent links:', true
-              links.each_with_index do |l, i|
-                m.reply "#{i+1}. #{l.url}", true
-              end
+            if m.channel?
+              m.reply 'This is spammy, better ask me on priv or checkout "links more"', true
             else
-              m.reply 'Don\'t have any links on record', true
+              links = Link.all(order: [:stamp.desc], limit: 10)
+              if links.any?
+                m.reply 'Recent links from all channels:', true
+                links.each_with_index do |l, i|
+                  m.reply "#{i+1}. #{l.url}", true
+                end
+              else
+                m.reply 'Don\'t have any links on record', true
+              end
             end
           when 'more'
             url = "#{CataBot.config['web']['url']}/links/last"
