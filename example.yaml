@@ -1,0 +1,49 @@
+---
+runtime:
+  daemon: false
+  pid_file: null
+  logging:
+    file: stdout
+    level: debug
+database: sqlite:///tmp/catabot.db
+cata: ~/path/to/cdda
+plugins:
+  - Base
+  - Seen
+  - Memo
+  - Links
+  - GitHub
+  - Jenkins
+  - Jq
+params:
+  base:
+    admin: dRbiG!*drbig@*.pl
+  seen:
+    expire: 100 days
+  memo:
+    limit: 3
+    expire: 1 week
+  links:
+    expire: 6 months
+  github:
+    repo: CleverRaven/Cataclysm-DDA
+    limit: 3
+  jenkins:
+    url: http://ci.narc.ro/view/Cataclysm-DDA/job/Cataclysm-Matrix
+    limit: 5
+  jq:
+    jq_bin: /usr/bin/jq
+    git_bin: /usr/bin/git
+    limit: 5
+    expire: 30 minutes
+web:
+  host: localhost
+  port: 8080
+irc:
+  nick: CopperTube
+  realname: I'm a robot. Trouble? Ask dRbiG.
+  user: catabot
+  pass: password
+  server: chat.freenode.net
+  channels:
+    - '#catabot-tests'
