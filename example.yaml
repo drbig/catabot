@@ -28,6 +28,7 @@ params:
     expire: 6 months
   github:
     repo: CleverRaven/Cataclysm-DDA
+    agent: drbig/catabot
     limit: 3
   jenkins:
     url: http://ci.narc.ro/view/Cataclysm-DDA/job/Cataclysm-Matrix

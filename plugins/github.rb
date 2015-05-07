@@ -4,9 +4,9 @@ require 'httparty'
 module CataBot
   module Plugin
     module GitHub
-      VERSION = '0.1.0'
+      VERSION = '0.1.1'
 
-      AGENT = 'drbig/catabot'
+      AGENT = CataBot.config['params']['github']['agent']
       LIMIT = CataBot.config['params']['github']['limit']
       REPO = CataBot.config['params']['github']['repo']
       BASE = 'https://api.github.com'
