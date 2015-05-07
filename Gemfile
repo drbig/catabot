@@ -1,0 +1,15 @@
+source 'https://rubygems.org'
+
+# note: this includes deps for every plugin
+gem 'addressable'
+gem 'chronic'
+gem 'cinch'
+gem 'dm-core'
+gem 'dm-migrations'
+gem 'eldr'
+gem 'haml'
+gem 'httparty'
+gem 'json'
+gem 'nokogiri'
+gem 'rack'
+gem 'thin'
