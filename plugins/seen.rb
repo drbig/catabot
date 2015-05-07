@@ -3,7 +3,7 @@ require 'chronic'
 module CataBot
   module Plugin
     module Seen
-      VERSION = '0.1.0'
+      VERSION = '0.1.1'
 
       EXPIRE = CataBot.config['params']['seen']['expire']
 
@@ -59,8 +59,9 @@ module CataBot
 
         command(:seen, /seen (.*)$/, 'seen [nick]', 'Check last known presence of [nick]')
         def seen(m, query)
-          if ns = NickSeen.get(query)
-            m.reply "Last seen #{query} #{ns.reply}", true
+          db_query = query.gsub('*', '%')
+          if ns = NickSeen.first(:nick.like => db_query)
+            m.reply "Last seen #{ns.nick} #{ns.reply}", true
           else
             m.reply "Don't recall seeing #{query}", true
           end
