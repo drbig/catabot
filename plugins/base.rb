@@ -2,6 +2,7 @@ module CataBot
   module IRC
     module Plugin
       ADMIN = Cinch::Mask.new(CataBot.config['params']['base']['admin'])
+      SOURCE = CataBot.config['params']['base']['source']
 
       def self.included(recv)
         recv.include(Cinch::Plugin)
@@ -22,7 +23,7 @@ module CataBot
 
   module Plugin
     module Base
-      VERSION = '0.1.0'
+      VERSION = '0.1.1'
 
       class App < Web::App
         get '/versions' do
@@ -73,6 +74,11 @@ module CataBot
         command(:admin_quit, /quit$/)
         def admin_quit(m)
           CataBot.stop! if ADMIN.match(m.user.mask)
+        end
+
+        command(:source, /source$/, 'source', 'Gives you the link to my source code')
+        def source(m)
+          m.reply "My code is at: #{SOURCE}", true
         end
       end
     end

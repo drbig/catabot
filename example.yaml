@@ -18,6 +18,7 @@ plugins:
 params:
   base:
     admin: dRbiG!*drbig@*.pl
+    source: https://github.com/drbig/catabot
   seen:
     expire: 100 days
   memo:
