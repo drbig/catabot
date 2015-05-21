@@ -68,7 +68,7 @@ module CataBot
         end
 
         CataBot.aux_thread(:seen_expire, 24 * 60 * 60) do
-          threshold = Chronic.parse(EXPIRE).to_datetime
+          threshold = Chronic.parse(EXPIRE + ' ago').to_datetime
           expired = NickSeen.all(:stamp.lt => threshold)
           deleted = 0
 

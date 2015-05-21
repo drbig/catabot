@@ -107,7 +107,7 @@ module CataBot
         end
 
         CataBot.aux_thread(:jq_expire, 5 * 60) do
-          threshold = Chronic.parse(EXPIRE)
+          threshold = Chronic.parse(EXPIRE + ' ago')
           deleted = 0
           @@results.each_pair do |k, v|
             if v[:stamp] < threshold

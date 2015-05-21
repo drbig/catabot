@@ -139,7 +139,7 @@ module CataBot
         end
 
         CataBot.aux_thread(:links_expire, 24 * 60 * 60) do
-          threshold = Chronic.parse(EXPIRE).to_datetime
+          threshold = Chronic.parse(EXPIRE + ' ago').to_datetime
           expired = Links.all(:stamp.lt => threshold)
           deleted = 0
 
