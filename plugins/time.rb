@@ -1,3 +1,4 @@
+require 'tzinfo/data'
 require 'tzinfo'
 
 module CataBot
