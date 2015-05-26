@@ -3,8 +3,8 @@ require 'tzinfo'
 
 module CataBot
   module Plugin
-    module Time
-      VERSION = '0.0.1'
+    module Clock
+      VERSION = '0.0.2'
 
       class IRC
         include CataBot::IRC::Plugin
