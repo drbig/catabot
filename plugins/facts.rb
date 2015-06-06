@@ -1,6 +1,8 @@
 module CataBot
   module Plugin
     module Facts
+      MIN_SCORE = CataBot.config['params']['facts']['min_score']
+
       class Fact
         include DataMapper::Resource
 
@@ -75,16 +77,25 @@ module CataBot
               else
                 fact.score -= 1
               end
-              unless fact.save
-                CataBot.log :error, "Facts: Error saving voted: #{fact}!"
-                m.reply 'Erm, something went wrong. I\'ve logged the fact', true
-                return
+              if fact.score <= MIN_SCORE
+                unless fact.destroy
+                  CataBot.log :error, "Facts: Error destroying: #{fact}!"
+                  m.reply 'Erm, something went wrong. I\'ve logged the fact', true
+                  return
+                end
+                m.reply "Fact (#{fact.id}) was wrong by popular vote. Already forgot it"
+              else
+                unless fact.save
+                  CataBot.log :error, "Facts: Error saving voted: #{fact}!"
+                  m.reply 'Erm, something went wrong. I\'ve logged the fact', true
+                  return
+                end
+                m.reply "Fact (#{fact.id}) has now score of #{fact.score}"
               end
-              m.reply "Fact (#{fact.id}) has now score of #{fact.score}"
             when 'stats'
               all = Fact.all(channel: m.channel).count
               keywords = Fact.all(fields: [:keyword], unique: true, channel: m.channel).count
-              m.reply "Know #{all} facts across #{keywords} keywords"
+              m.reply "I know #{all} facts across #{keywords} keywords"
             else
               m.reply 'Sorry, didn\'t get that... ' + HELP, true
             end

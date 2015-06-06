@@ -10,9 +10,11 @@ database: sqlite:///tmp/catabot.db
 cata: ~/path/to/cdda
 plugins:
   - Base
+  - Clock
   - Seen
   - Memo
   - Links
+  - Facts
   - GitHub
   - Jenkins
   - Jq
@@ -27,6 +29,8 @@ params:
     expire: 1 week
   links:
     expire: 6 months
+  facts:
+    min_vote: -5
   github:
     repo: CleverRaven/Cataclysm-DDA
     agent: drbig/catabot
