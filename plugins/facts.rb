@@ -27,7 +27,7 @@ module CataBot
 
           if cmd == 'facts'
             keyword = scmd.downcase
-            facts = Fact.all(keyword: keyword, order: [:score.desc])
+            facts = Fact.all(keyword: keyword, order: [:score.desc], channel: m.channel)
             if facts.empty?
               m.reply "Sorry, have nothing about '#{keyword}'. Maybe add some facts about it?", true
             else
@@ -82,8 +82,8 @@ module CataBot
               end
               m.reply "Fact (#{fact.id}) has now score of #{fact.score}"
             when 'stats'
-              all = Fact.count
-              keywords = Fact.all(fields: [:keyword], unique: true).count
+              all = Fact.all(channel: m.channel).count
+              keywords = Fact.all(fields: [:keyword], unique: true, channel: m.channel).count
               m.reply "Know #{all} facts across #{keywords} keywords"
             else
               m.reply 'Sorry, didn\'t get that... ' + HELP, true
