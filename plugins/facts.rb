@@ -2,6 +2,10 @@ module CataBot
   module Plugin
     module Facts
       MIN_SCORE = CataBot.config['params']['facts']['min_score']
+      TEMPLATES = Hash[Dir.glob('data/facts/*.haml').collect do |p|
+        name = File.basename(p, '.haml').to_sym
+        [name, Haml::Engine.new(File.read(p))]
+      end]
 
       class Fact
         include DataMapper::Resource
@@ -15,6 +19,15 @@ module CataBot
         property :user, String, length: 1..128, required: true
         property :stamp, Time, default: Proc.new { Time.now }, required: true
       end
+
+      class App < Web::App
+        get '/recent' do
+          recent = Fact.all(order: [:stamp.desc], limit: 32)
+          html = TEMPLATES[:recent].render(self, {recent: recent})
+          reply(html, 200, {'Content-Type' => 'text/html'})
+        end
+      end
+      Web.mount('/facts', App)
 
       class IRC
         include CataBot::IRC::Plugin
