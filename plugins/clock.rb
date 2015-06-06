@@ -4,8 +4,6 @@ require 'tzinfo'
 module CataBot
   module Plugin
     module Clock
-      VERSION = '0.0.2'
-
       class IRC
         include CataBot::IRC::Plugin
 

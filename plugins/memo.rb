@@ -3,8 +3,6 @@ require 'chronic'
 module CataBot
   module Plugin
     module Memo
-      VERSION = '0.1.0'
-
       LIMIT = CataBot.config['params']['memo']['limit']
       EXPIRE = CataBot.config['params']['memo']['expire']
 

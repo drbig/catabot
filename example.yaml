@@ -5,6 +5,7 @@ runtime:
   logging:
     file: stdout
     level: debug
+  version: false
 database: sqlite:///tmp/catabot.db
 cata: ~/path/to/cdda
 plugins:

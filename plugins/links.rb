@@ -6,8 +6,6 @@ require 'nokogiri'
 module CataBot
   module Plugin
     module Links
-      VERSION = '0.1.5'
-
       SCHEMES = %w{http https ftp ftps}
       TEMPLATE = Haml::Engine.new(File.read('data/links/last.haml'))
       EXPIRE = CataBot.config['params']['links']['expire']

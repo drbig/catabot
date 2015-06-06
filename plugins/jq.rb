@@ -4,8 +4,6 @@ require 'haml'
 module CataBot
   module Plugin
     module Jq
-      VERSION = '0.0.5'
-
       BASEDIR = File.expand_path(CataBot.config['cata'])
       JSONDIR = File.join(BASEDIR, 'data', 'json')
       JQ = File.expand_path(CataBot.config['params']['jq']['jq_bin'])

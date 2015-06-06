@@ -3,8 +3,6 @@ require 'chronic'
 module CataBot
   module Plugin
     module Seen
-      VERSION = '0.1.1'
-
       EXPIRE = CataBot.config['params']['seen']['expire']
 
       class IRC

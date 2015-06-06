@@ -11,8 +11,6 @@ require 'rack'
 require 'thin'
 
 module CataBot
-  VERSION = '0.1.0'
-
   class Error < StandardError; end
 
   @@config = Hash.new
@@ -85,6 +83,10 @@ module CataBot
 
   def self.fire!
     c = @@config
+
+    unless c['runtime']['version']
+      c['runtime']['version'] = `git describe --tags --always --dirty`.chop
+    end
 
     lf = c['runtime']['logging']['file']
     lt = if lf == 'stdout'

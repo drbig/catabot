@@ -23,15 +23,11 @@ module CataBot
 
   module Plugin
     module Base
-      VERSION = '0.1.1'
-
       class App < Web::App
-        get '/versions' do
+        get '/plugins' do
           reply_ok({
-            version: CataBot::VERSION,
-            plugins: CataBot.config['plugins'].map do |p|
-              {p => CataBot::Plugin.const_get(p).const_get('VERSION')}
-            end
+            version: CataBot.config['runtime']['version'],
+            plugins: CataBot.config['plugins'],
           })
         end
       end
@@ -48,7 +44,7 @@ module CataBot
 
         command(:version, /version$/, 'version', 'Tells you the version')
         def version(m)
-          m.reply "I'm Catabot v#{CataBot::VERSION}", true
+          m.reply "I'm Catabot #{CataBot.config['runtime']['version']}", true
         end
 
         command(:plugins, /plugins$/, 'plugins', 'Tells you what plugins are loaded')

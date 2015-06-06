@@ -3,8 +3,6 @@ require 'httparty'
 module CataBot
   module Plugin
     module Jenkins
-      VERSION = '0.0.1'
-
       LIMIT = CataBot.config['params']['jenkins']['limit']
       URL = CataBot.config['params']['jenkins']['url']
 
