@@ -6,6 +6,7 @@ require 'yaml'
 require 'cinch'
 require 'cinch/logger/formatted_logger'
 require 'dm-core'
+require 'dm-migrations'
 require 'eldr'
 require 'rack'
 require 'thin'
@@ -110,14 +111,7 @@ module CataBot
     self.log :info, 'Setting up database...'
     DataMapper.finalize
     DataMapper.setup(:default, c['database'])
-    if m = c['database'].match(/sqlite:\/\/(.*)/)
-      p = m.captures.first
-      unless File.exists? p
-        self.log :info, 'Migrating database...'
-        require 'dm-migrations'
-        DataMapper.auto_migrate!
-      end
-    end
+    DataMapper.auto_upgrade!
 
     self.log :info, 'Configuring web backend...'
     app = Rack::Builder.new do
