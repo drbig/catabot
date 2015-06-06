@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 
-# note: this includes deps for every plugin
+# note: this includes deps for every plugin,
+# except for specific database driver(s).
 gem 'addressable'
 gem 'chronic'
 gem 'cinch'
@@ -13,3 +14,5 @@ gem 'json'
 gem 'nokogiri'
 gem 'rack'
 gem 'thin'
+gem 'tzinfo'
+gem 'tzinfo-data'
