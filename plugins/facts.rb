@@ -38,13 +38,14 @@ module CataBot
           @@mutex.synchronize { @@voters.clear }
         end
 
-        HELP = 'Can do: facts [keyword], fact add [keyword] [text], fact vote [up|down] [id], fact about [id], fact del [id], fact stats'
+        HELP = 'Can do: facts [keyword], fact add [keyword] [text], fact vote [up|down] [id], fact about [id], fact del [id], fact stats, fact links'
         command(:facts, /(facts?) ?(\w+)? ?(.*)?$/, 'fact', 'Ask about facts I know. See "fact help"')
         def facts(m, cmd, scmd, rest)
           unless m.channel?
             m.reply 'This only works in the context of a channel', true
             return
           end
+          url = "#{CataBot.config['web']['url']}/facts"
           if cmd == 'facts'
             keyword = scmd.downcase
             facts = Fact.all(keyword: keyword, order: [:score.desc], channel: m.channel)
@@ -59,6 +60,9 @@ module CataBot
             case scmd
             when 'help'
               m.reply HELP, true
+            when 'links'
+              links = ['recent'].map {|l| url + '/' + l}
+              m.reply 'See: ' + links.join(' '), true
             when 'add'
               keyword, *text = rest.split(/\s+/)
               keyword.downcase!
