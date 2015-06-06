@@ -123,11 +123,12 @@ module CataBot
       class IRC
         include CataBot::IRC::Plugin
 
+        HELP = 'Can do: jq wtf, jq version, jq query [query], jq last'
         command(:jq, /jq ?(\w+)? ?(.*)?$/, 'jq', 'Issue a jq command. See "jq help"')
         def jq(m, cmd, rest)
           case cmd
           when 'help'
-            m.reply 'Can do: jq wtf, jq version, jq query [query], jq last', true
+            m.reply HELP, true
           when 'wtf'
             m.reply 'RTFM - http://stedolan.github.io/jq/manual/', true
           when 'version'
@@ -143,7 +144,7 @@ module CataBot
             end
             App.query(m, rest)
           else
-            m.reply 'Perhaps ask me "jq help"?', true
+            m.reply 'Sorry, didn\'t get that... ' + HELP, true
           end
         end
       end

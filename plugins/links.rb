@@ -104,14 +104,16 @@ module CataBot
           end
         end
 
+        HELP = 'Can do: links recent, links more, links about [link]'
         command(:links, /links ?(\w+)? ?(.*)?$/, 'links', 'Ask about links I\'ve seen. See "links help"')
         def links(m, cmd, rest)
+          url = "#{CataBot.config['web']['url']}/links/last"
           case cmd
           when 'help'
-            m.reply 'Can do: links recent, links more, links about [link]', true
+            m.reply HELP, true
           when 'recent'
             if m.channel?
-              m.reply 'This is spammy, better ask me on priv or checkout "links more"', true
+              m.reply "This is spammy, better checkout #{url}", true
             else
               links = Link.all(order: [:stamp.desc], limit: 10)
               if links.any?
@@ -124,7 +126,6 @@ module CataBot
               end
             end
           when 'more'
-            url = "#{CataBot.config['web']['url']}/links/last"
             m.reply "You can see more links here: #{url}", true
           when 'about'
             if link = Link.get(rest)
@@ -134,7 +135,7 @@ module CataBot
               m.reply 'Don\'t recall such link', true
             end
           else
-            m.reply 'Perhaps ask me "links help"?', true
+            m.reply 'Sorry, didn\'t get that... ' + HELP, true
           end
         end
 

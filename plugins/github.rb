@@ -50,11 +50,12 @@ module CataBot
           end
         end
 
+        HELP = 'Can do: github recent, github link [number], github about [number], github search [query]'
         command(:github, /github ?(\w+)? ?(.*)?$/, 'github', 'Query CDDA\'s GitHub repo. See "github help"')
         def github(m, cmd, rest)
           case cmd
           when 'help'
-            m.reply 'Can do: github recent, github link [number], github about [number], github search [query]', true
+            m.reply HELP, true
           when 'recent'
             query(m, "#{URL}/pulls", state: 'closed') do |res|
               limit = m.channel? ? 3 : 10
@@ -103,7 +104,7 @@ module CataBot
               end
             end
           else
-            m.reply 'Perhaps ask me "github help"?', true
+            m.reply 'Sorry, didn\'t get that... ' + HELP, true
           end
         end
       end

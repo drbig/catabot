@@ -39,11 +39,12 @@ module CataBot
           end
         end
 
+        HELP = 'Can do: memo pending, memo tell [nick] [message], memo forget [nick]'
         command(:memo, /memo ?(\w+)? ?(.*)$/, 'memo', 'Leave a note for another user. See "memo help"')
         def memo(m, cmd, rest)
           case cmd
           when 'help'
-            m.reply 'Can do: memo pending, memo tell [nick] [message], memo forget [nick]', true
+            m.reply HELP, true
           when 'pending'
             notes = get_pending(m)
             if notes.any?
@@ -101,7 +102,7 @@ module CataBot
               end
             end
           else
-            m.reply 'Perhaps ask me "memo help"?', true
+            m.reply 'Sorry, didn\'t get that... ' + HELP, true
           end
         end
 

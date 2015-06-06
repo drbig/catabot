@@ -46,11 +46,12 @@ module CataBot
           end
         end
 
+        HELP = 'Can do: jenkins recent, jenkins about [number]'
         command(:jenkins, /jenkins ?(\w+)? ?(.*)?$/, 'jenkins', 'Query CDDA\'s Jenkins build bot. See "jenkins help"')
         def jenkins(m, cmd, rest)
           case cmd
           when 'help'
-            m.reply 'Can do: jenkins recent, jenkins about [number]', true
+            m.reply HELP, true
           when 'recent'
             query(m, URL) do |res|
               numbers = %w{lastBuild lastSuccessfulBuild}.map {|k| res[k]['number'] }
@@ -79,7 +80,7 @@ module CataBot
               end
             end
           else
-            m.reply 'Perhaps ask me "jenkins help"?', true
+            m.reply 'Sorry, didn\'t get that... ' + HELP, true
           end
         end
       end
