@@ -15,7 +15,7 @@ module CataBot
         def command(meth, rexp, name = nil, desc = nil)
           CataBot::IRC.cmd(name, desc) if name && desc
           match(rexp, method: meth, react_on: :channel)
-          match(rexp, method: meth, react_on: :private, use_prefix: false)
+          match(/^#{rexp}/, method: meth, react_on: :private, use_prefix: false)
         end
       end
     end
