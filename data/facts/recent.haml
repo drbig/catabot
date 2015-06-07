@@ -14,6 +14,7 @@
           %thead
             %tr
               %th #
+              %th Score
               %th Keyword
               %th Text
               %th Who
@@ -24,13 +25,18 @@
               %tr
                 %td.center
                   %b= r.id
+                %td.center
+                  - if r.score < 0
+                    %span{style: 'color: red;'}= r.score
+                  - else
+                    %span{style: 'color: green;'}= r.score
                 %td= r.keyword
                 %td= r.text
                 %td= r.user.split('!').first
                 %td= r.stamp.utc.strftime('%Y-%m-%d %H:%M:%S %Z')
                 %td= r.channel
       - else
-        %h4 No facts on record, yet :(
+        %h4 No facts on record, yet.
         %hr
       %small
         Made possible with Catabot #{CataBot.config['runtime']['version']}.
