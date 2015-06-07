@@ -1,0 +1,48 @@
+!!!
+%html{:lang => "en"}
+  %head
+    %meta{:charset => "utf-8"}/
+    %title Fact browser
+    %link{:rel => "stylesheet", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"}/
+    %link{:rel => "stylesheet", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css"}/
+  %body
+    .container
+      %h3 Fact browser
+      %hr
+      %form.form-inline{:method => :get, :action => '#'}
+        .form-group
+          %label{:for => :channel} Channel
+          %input.form-control{:type => :text, :id => :channel, :name => :channel, :value => channel, :readonly => true}
+          %label{:for => :keyword} Keyword
+          %input.form-control{:type => :text, :id => :keyword, :name => :keyword, :value => keyword}
+          %button.btn.btn-default{:type => :submit} Search
+      %hr
+      - if facts.any?
+        %table.table.table-striped
+          %thead
+            %tr
+              %th #
+              %th Score
+              %th Keyword
+              %th Text
+              %th Who
+              %th When
+          %tbody
+            - facts.each do |f|
+              %tr
+                %td.center
+                  %b= f.id
+                %td.center
+                  - if f.score < 0
+                    %span{style: 'color: red;'}= f.score
+                  - else
+                    %span{style: 'color: green;'}= f.score
+                %td= f.keyword
+                %td= f.text
+                %td= f.user.split('!').first
+                %td= f.stamp.utc.strftime('%Y-%m-%d %H:%M:%S %Z')
+      - else
+        %h4 No facts found.
+        %hr
+      %small
+        Made possible with Catabot #{CataBot.config['runtime']['version']}.

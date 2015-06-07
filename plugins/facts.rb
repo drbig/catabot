@@ -1,3 +1,5 @@
+require 'uri'
+
 module CataBot
   module Plugin
     module Facts
@@ -22,8 +24,19 @@ module CataBot
 
       class App < Web::App
         get '/recent' do
-          recent = Fact.all(order: [:stamp.desc], limit: 32)
+          recent = Fact.all(order: [:stamp.desc], limit: 50)
           html = TEMPLATES[:recent].render(self, {recent: recent})
+          reply(html, 200, {'Content-Type' => 'text/html'})
+        end
+
+        get '/browse' do
+          channel = URI.decode(params['channel'] || '')
+          keyword = params['keyword']
+          page = params['page'] || 1
+          query = {channel: channel, order: [:stamp.desc]}
+          query[:keyword.like] = URI.decode(keyword) if keyword && !keyword.empty?
+          facts = Fact.all(query)
+          html = TEMPLATES[:browse].render(self, {facts: facts, channel: channel, keyword: keyword})
           reply(html, 200, {'Content-Type' => 'text/html'})
         end
       end
@@ -42,10 +55,9 @@ module CataBot
         command(:facts, /facts ?(\w+)? ?(.*)?$/, 'facts', 'Ask about facts I know. See "facts help"')
         def facts(m, cmd, rest)
           if !m.channel? && cmd != 'help' 
-            m.reply 'This only works in the context of a channel', true
+            m.reply 'Facts work only in the context of a channel', true
             return
           end
-          url = "#{CataBot.config['web']['url']}/facts"
           case cmd
           when 'help'
             m.reply HELP, true
@@ -60,8 +72,7 @@ module CataBot
               m.reply msg
             end
           when 'links'
-            links = ['recent'].map {|l| url + '/' + l}
-            m.reply 'See: ' + links.join(' '), true
+            m.reply "See: #{CataBot.config['web']['url']}/facts/browse?channel=#{URI.encode(m.channel.to_s)}", true
           when 'add'
             keyword, *text = rest.split(/\s+/)
             keyword.downcase!
