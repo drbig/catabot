@@ -20,10 +20,6 @@ module CataBot
           property :body, Text, required: true
         end
 
-        def get_pending(m)
-          Note.all(by: m.user.nick, channel: m.channel.to_s)
-        end
-
         listen_to :join, method: :join
         def join(m)
           notes = Note.all(for: m.user.nick)
@@ -44,11 +40,27 @@ module CataBot
           when 'help'
             m.reply HELP, true
           when 'pending'
-            notes = get_pending(m)
-            if notes.any?
-              m.reply "I have your pending notes for #{notes.map(&:for).join(', ')} on file", true
+            if m.channel?
+              notes = Note.all(by: m.user.nick, channel: m.channel.to_s)
+              if notes.any?
+                m.reply "I have your pending notes for #{notes.map(&:for).join(', ')} on file", true
+              else
+                m.reply 'You don\'t have any notes pending here', true
+              end
             else
-              m.reply 'You don\'t have any notes pending here', true
+              notes = Note.all(by: m.user.nick, order: [:channel])
+              if notes.any?
+                map = Hash.new
+                notes.each do |n|
+                  map[n.channel] ||= Array.new
+                  map[n.channel].push(n)
+                end
+                msg = 'I have your pending notes for '
+                msg += map.each_pair.collect {|c,n| "#{c}: #{n.map(&:for).join(', ')}" }.join('; ')
+                m.reply msg, true
+              else
+                m.reply 'You don\'t have any notes pending', true
+              end
             end
           when 'tell'
             unless rm = rest.match(/^(.*?)\s+(.*)$/)
