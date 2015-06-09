@@ -5,9 +5,8 @@ runtime:
   logging:
     file: stdout
     level: debug
-  version: false
+  version: false # use git to figure out current version
 database: sqlite:///tmp/catabot.db
-cata: ~/path/to/cdda
 plugins:
   - Base
   - Clock
@@ -39,8 +38,9 @@ params:
     url: http://ci.narc.ro/view/Cataclysm-DDA/job/Cataclysm-Matrix
     limit: 5
   jq:
+    data: ~/path/json/data
+    version: false # use git to figure out current version
     jq_bin: /usr/bin/jq
-    git_bin: /usr/bin/git
     limit: 5
     expire: 30 minutes
 web:

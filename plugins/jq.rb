@@ -4,17 +4,17 @@ require 'haml'
 module CataBot
   module Plugin
     module Jq
-      BASEDIR = File.expand_path(CataBot.config['cata'])
-      JSONDIR = File.join(BASEDIR, 'data', 'json')
-      JQ = File.expand_path(CataBot.config['params']['jq']['jq_bin'])
-      GIT = File.expand_path(CataBot.config['params']['jq']['git_bin'])
+      DATADIR = File.expand_path(CataBot.config['params']['jq']['data'])
+      VERSION = CataBot.config['params']['jq']['version']
+      JQ = CataBot.config['params']['jq']['jq_bin']
       LIMIT = CataBot.config['params']['jq']['limit']
       EXPIRE = CataBot.config['params']['jq']['expire']
       TEMPLATE = Haml::Engine.new(File.read('data/jq/result.haml'))
       GROUPS = %w{null [] {} true false 0}
 
-      def self.cata_ver
-        `cd #{BASEDIR}; #{GIT} describe --tags --always --dirty`.chop
+      def self.data_version
+        return VERSION if VERSION
+        `cd #{DATADIR}; git describe --tags --always --dirty`.chop
       end
 
       class App < Web::App
@@ -48,7 +48,7 @@ module CataBot
 
           exceptions = Array.new
           results = {'main' => Hash.new}
-          Dir.chdir(JSONDIR)
+          Dir.chdir(DATADIR)
           Dir.glob('**/*.json') do |p|
             begin
               io = IO.popen([JQ, query, p, :err=>[:child,:out]])
@@ -71,7 +71,7 @@ module CataBot
             end
           end
 
-          html = TEMPLATE.render(self, {query: query, results: results, started: started, exceptions: exceptions, ver: Jq.cata_ver})
+          html = TEMPLATE.render(self, {query: query, results: results, started: started, exceptions: exceptions, ver: Jq.data_version})
 
           @@mutex.synchronize do
             @@results[id] = {id: id, html: html, stamp: Time.now, by: m.user, query: query}
@@ -131,7 +131,7 @@ module CataBot
             m.reply 'RTFM - http://stedolan.github.io/jq/manual/', true
           when 'version'
             jver = `#{JQ} --version`.chop
-            m.reply "You can run #{jver} queries against #{Jq.cata_ver}", true
+            m.reply "You can run #{jver} queries against #{Jq.data_version}", true
           when 'last'
             m.reply App.results, true
           when 'query'
