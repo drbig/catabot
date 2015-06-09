@@ -61,7 +61,7 @@ module CataBot
               limit = m.channel? ? 3 : 10
               m.reply 'Fresh pending PRs:', true
               res['items'].slice(0, limit).each do |i|
-                m.reply "##{i['number']} \"#{i['title']}\"", true
+                m.reply "##{i['number']} \"#{i['title']}\" by #{i['user']['login']}", true
               end
             end
           when 'recent'
@@ -69,7 +69,7 @@ module CataBot
               limit = m.channel? ? 3 : 10
               m.reply 'Recent merged PRs:', true
               res.slice(0, limit).each do |pr|
-                m.reply "##{pr['number']} \"#{pr['title']}\"", true
+                m.reply "##{pr['number']} \"#{pr['title']}\" by #{pr['user']['login']}", true
               end
             end
           when 'link'
