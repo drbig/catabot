@@ -44,12 +44,29 @@ module CataBot
           end
         end
 
-        HELP = 'Can do: jenkins recent, jenkins about [number]'
+        HELP = 'Can do: jenkins last, jenkins recent, jenkins about [number]'
         command(:jenkins, /jenkins ?(\w+)? ?(.*)?$/, 'jenkins [...]', HELP)
         def jenkins(m, cmd, rest)
           case cmd
           when 'help'
             m.reply HELP, true
+          when 'last'
+            id = nil
+            query(m, URL) do |res_a|
+              id = res_a['lastSuccessfulBuild']['number']
+            end
+            return unless id
+            query(m, "#{URL}/#{id}") do |res_b|
+              begin
+                commitish = 'g' + res_b['actions'][3]['buildsByBranchName']['origin/master']['revision']['SHA1'].slice(0, 7)
+                stamp = Time.at(res_b['timestamp'].to_f / 1000.0).utc.strftime('%Y-%m-%d %H:%M:%S %Z')
+                m.reply "##{id} #{res_b['result']} at #{commitish} on #{stamp}", true
+              rescue StandardError => e
+                CataBot.log :warn, 'Jenkins: Error parsing additional about data'
+                CataBot.log :exception, e
+                m.reply 'Sorry, something seems to have gone wrong. Things have been logged', true
+                end
+              end
           when 'recent'
             query(m, URL) do |res|
               numbers = %w{lastBuild lastSuccessfulBuild}.map {|k| res[k]['number'] }
