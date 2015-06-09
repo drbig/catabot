@@ -22,19 +22,27 @@ module CataBot
 
         listen_to :join, method: :join
         def join(m)
-          notes = Note.all(for: m.user.nick)
-          if notes.any?
-            notes.each do |n|
-              if n.channel == 'privmsg'
-                m.user.send "#{n.by} left a note for you: #{n.body}"
-              elsif n.channel == m.channel.to_s
-                m.reply "#{n.by} left a note for you: #{n.body}", true
-              else
-                next
-              end
-              unless n.destroy
-                CataBot.log :error, "Couldn't destroy note: #{n.errors.join(', ')}"
-              end
+          nicks = Note.all(fields: [:for], unique: true)
+          return unless nicks.any?
+
+          matches = nicks.select {|n| m.user.nick.match(/^#{n.for}.*/i) }
+          return unless matches.any?
+
+          if matches.length > 1
+            CataBot.log :warn, "Multiple memo nick matches for: #{m.user.nick}"
+            # well, let's use the first one only anyways
+          end
+
+          Note.all(for: matches.first.for).each do |n|
+            if n.channel == 'privmsg'
+              m.user.send "#{n.by} left a note for you: #{n.body}"
+            elsif n.channel == m.channel.to_s
+              m.reply "#{n.by} left a note for you: #{n.body}", true
+            else
+              next
+            end
+            unless n.destroy
+              CataBot.log :error, "Couldn't destroy note: #{n.errors.join(', ')}"
             end
           end
         end
