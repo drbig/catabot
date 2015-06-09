@@ -25,7 +25,13 @@ module CataBot
           notes = Note.all(for: m.user.nick)
           if notes.any?
             notes.each do |n|
-              m.reply "#{n.by} left a note for you: #{n.body}", true
+              if n.channel == 'privmsg'
+                m.user.send "#{n.by} left a note for you: #{n.body}"
+              elsif n.channel == m.channel.to_s
+                m.reply "#{n.by} left a note for you: #{n.body}", true
+              else
+                next
+              end
               unless n.destroy
                 CataBot.log :error, "Couldn't destroy note: #{n.errors.join(', ')}"
               end
@@ -56,7 +62,7 @@ module CataBot
                   map[n.channel].push(n)
                 end
                 msg = 'I have your pending notes for '
-                msg += map.each_pair.collect {|c,n| "#{c}: #{n.map(&:for).join(', ')}" }.join('; ')
+                msg += map.each_pair.collect {|c, n| "#{c}: #{n.map(&:for).join(', ')}" }.join('; ')
                 m.reply msg, true
               else
                 m.reply 'You don\'t have any notes pending', true
@@ -72,12 +78,17 @@ module CataBot
                 return
               end
 
-              if m.channel.has_user? to
-                m.reply "You can tell that #{to} yourself", true
-                return
+              if m.channel?
+                if m.channel.has_user? to
+                  m.reply "You can tell that #{to} yourself", true
+                  return
+                end
+                chan = m.channel.to_s
+              else
+                chan = 'privmsg'
               end
 
-              if Note.all(for: to, by: m.user.nick, channel: m.channel.to_s).any?
+              if Note.all(for: to, by: m.user.nick, channel: chan).any?
                 m.reply "Sorry, you already have a note pending for #{to}. You can always tell me to forget it...", true
                 return
               end
@@ -87,7 +98,7 @@ module CataBot
                 return
               end
 
-              note = Note.new(for: to, by: m.user.nick, channel: m.channel, body: body)
+              note = Note.new(for: to, by: m.user.nick, channel: chan, body: body)
               if note.save 
                 m.reply "Noted down. Will try my best to relay that to #{to}", true
               else
@@ -99,7 +110,12 @@ module CataBot
             if rest.empty?
               m.reply 'Wrong format, use e.g. "memo forget dRbiG"', true
             else
-              notes = Note.all(by: m.user.nick, for: rest, channel: m.channel.to_s)
+              if m.channel?
+                chan = m.channel.to_s
+              else
+                chan = 'privmsg'
+              end
+              notes = Note.all(by: m.user.nick, for: rest, channel: chan)
               if notes.any?
                 if notes.destroy
                   m.reply "Forgot that note for #{rest}", true
@@ -108,7 +124,11 @@ module CataBot
                   m.reply 'Something went wrong... Sorry', true
                 end
               else
-                m.reply "You haven't left a note for #{rest}", true
+                if m.channel?
+                  m.reply "You haven't left a note for #{rest} here", true
+                else
+                  m.reply "You haven't left a private note for #{rest}", true
+                end
               end
             end
           else
