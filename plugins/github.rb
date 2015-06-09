@@ -1,4 +1,5 @@
 require 'addressable/uri'
+require 'chronic'
 require 'httparty'
 
 module CataBot
@@ -48,12 +49,21 @@ module CataBot
           end
         end
 
-        HELP = 'Can do: github recent, github link [number], github about [number], github search [query]'
+        HELP = 'Can do: github pending, github recent, github link [number], github about [number], github search [query]'
         command(:github, /github ?(\w+)? ?(.*)?$/, 'github [...]', HELP)
         def github(m, cmd, rest)
           case cmd
           when 'help'
             m.reply HELP, true
+          when 'pending'
+            stamp = Chronic.parse('3 days ago').strftime('%Y-%m-%d')
+            query(m, "#{BASE}/search/issues", q: "repo:#{REPO} is:pr is:open updated:>=#{stamp} NOT wip in:title") do |res|
+              limit = m.channel? ? 3 : 10
+              m.reply 'Fresh pending PRs:', true
+              res['items'].slice(0, limit).each do |i|
+                m.reply "##{i['number']} \"#{i['title']}\"", true
+              end
+            end
           when 'recent'
             query(m, "#{URL}/pulls", state: 'closed') do |res|
               limit = m.channel? ? 3 : 10
