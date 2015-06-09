@@ -45,7 +45,7 @@ module CataBot
         end
 
         HELP = 'Can do: jenkins recent, jenkins about [number]'
-        command(:jenkins, /jenkins ?(\w+)? ?(.*)?$/, 'jenkins', 'Query CDDA\'s Jenkins build bot. See "jenkins help"')
+        command(:jenkins, /jenkins ?(\w+)? ?(.*)?$/, 'jenkins [...]', HELP)
         def jenkins(m, cmd, rest)
           case cmd
           when 'help'

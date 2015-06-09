@@ -103,7 +103,7 @@ module CataBot
         end
 
         HELP = 'Can do: links recent, links about [link]'
-        command(:links, /links ?(\w+)? ?(.*)?$/, 'links', 'Ask about links I\'ve seen. See "links help"')
+        command(:links, /links ?(\w+)? ?(.*)?$/, 'links [...]', HELP)
         def links(m, cmd, rest)
           url = "#{CataBot.config['web']['url']}/links/last"
           case cmd

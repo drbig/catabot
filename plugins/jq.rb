@@ -122,7 +122,7 @@ module CataBot
         include CataBot::IRC::Plugin
 
         HELP = 'Can do: jq wtf, jq version, jq query [query], jq last'
-        command(:jq, /jq ?(\w+)? ?(.*)?$/, 'jq', 'Issue a jq command. See "jq help"')
+        command(:jq, /jq ?(\w+)? ?(.*)?$/, 'jq [...]', HELP)
         def jq(m, cmd, rest)
           case cmd
           when 'help'

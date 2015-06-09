@@ -55,7 +55,7 @@ module CataBot
         listen_to :leaving, method: :leaving
         def leaving(m, user); record(m, user); end
 
-        command(:seen, /seen (.*)$/, 'seen [nick]', 'Check last known presence of [nick]')
+        command(:seen, /seen (.*)$/, 'seen [nick]', 'Check last known presence of [nick]. Accepts wildcards')
         def seen(m, query)
           db_query = query.gsub('*', '%')
           if ns = NickSeen.first(:nick.like => db_query)

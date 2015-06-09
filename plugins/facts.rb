@@ -52,7 +52,7 @@ module CataBot
         end
 
         HELP = 'Can do: facts all [keyword], facts add [keyword] [text], facts vote [up|down] [id], facts about [id], facts del [id], facts stats, facts links'
-        command(:facts, /facts ?(\w+)? ?(.*)?$/, 'facts', 'Ask about facts I know. See "facts help"')
+        command(:facts, /facts ?(\w+)? ?(.*)?$/, 'facts [...]', HELP)
         def facts(m, cmd, rest)
           if !m.channel? && cmd != 'help' 
             m.reply 'Facts work only in the context of a channel', true

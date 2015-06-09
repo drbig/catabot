@@ -49,7 +49,7 @@ module CataBot
         end
 
         HELP = 'Can do: github recent, github link [number], github about [number], github search [query]'
-        command(:github, /github ?(\w+)? ?(.*)?$/, 'github', 'Query CDDA\'s GitHub repo. See "github help"')
+        command(:github, /github ?(\w+)? ?(.*)?$/, 'github [...]', HELP)
         def github(m, cmd, rest)
           case cmd
           when 'help'

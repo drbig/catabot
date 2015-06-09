@@ -57,11 +57,12 @@ module CataBot
           m.reply "I can reply to: #{CataBot::IRC.cmds.keys.sort.join(', ')}", true
         end
 
-        command(:help_command, /help (.*)$/, 'help [command]', 'Tells you basic [command] help')
+        command(:help_command, /help (.+)$/, 'help [command]', 'Tells you basic [command] help')
         def help_command(m, arg)
           cmd = arg.downcase
-          if CataBot::IRC.cmds.has_key? cmd
-            m.reply "\"#{cmd}\" - #{CataBot::IRC.cmds[cmd]}", true
+          matches = CataBot::IRC.cmds.keys.select {|k| k.match(/^#{cmd}.*/) }
+          if matches.any?
+            matches.each {|k| m.reply "#{k} - #{CataBot::IRC.cmds[k]}", true }
           else
             m.reply 'Can\'t help you with that', true
           end
