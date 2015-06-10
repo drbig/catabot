@@ -68,7 +68,7 @@ module CataBot
               m.reply 'Sorry, don\'t have any rules on file here.', true
             end
           when 'links'
-            m.reply "See: #{url}?channel=#{URI.encode(m.channel.to_s)} and/or #{url}/recent", true
+            m.reply "See: #{url}/browse?channel=#{URI.encode(m.channel.to_s)} and/or #{url}/recent", true
           when 'add'
             if rest.empty?
               m.reply 'Sorry, you need to specify a rule body', true
