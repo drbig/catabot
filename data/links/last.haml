@@ -7,15 +7,15 @@
     %link{:rel => "stylesheet", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css"}/
   %body
     .container
-      - if chan
-        %h3= "Recent links for '#{chan}'"
-      - else
-        %h3 Recent links
+      %h3 Recent links
       %hr
       %form.form-inline{:method => :get, :action => '#'}
         .form-group
-          %label{:for => :chan}Channel
-          %input.form-control{:type => :text, :id => :chan, :name => :chan, :placeholder => 'No need for #'}
+          %label{:for => :channel} Channel
+          %select.form-control{:id => :chan, :name => :channel}
+            - channels.each do |c|
+              %option{:value => c, :selected => (c == channel)}= c
+            %option{:value => '', :selected => channel.nil?} All
           %button.btn.btn-default{:type => :submit} Filter
       %hr
       - if links.any?

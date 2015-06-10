@@ -29,14 +29,16 @@ module CataBot
         get '/last' do
           limit = params['limit'].to_i rescue 50
           limit = 50 if limit < 1 || limit > 256
-          chan = params['chan'] || false
+          channel = params['channel']
 
-          if chan
-            links = Link.all(:limit => limit, :order => [:stamp.desc], :channel.like => "%#{chan}%")
+          if channel && !channel.empty?
+            links = Link.all(channel: channel, limit: limit, order: [:stamp.desc])
           else
+            channel = nil
             links = Link.all(limit: limit, order: [:stamp.desc])
           end
-          html = TEMPLATE.render(self, {links: links, chan: chan})
+          chans = Link.all(fields: [:channel], unique: true).map(&:channel)
+          html = TEMPLATE.render(self, {links: links, channel: channel, channels: chans})
           reply(html, 200, {'Content-Type' => 'text/html'})
         end
       end
