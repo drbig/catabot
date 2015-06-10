@@ -109,7 +109,7 @@ module CataBot
             end
             key = "#{m.user.mask}-#{id}"
             if @@voters.has_key? key
-              m.reply "You've already voted for #{id} today, try tomorrow", true
+              m.reply "You've already voted for (#{id}) today, try tomorrow", true
               return
             end
             if dir == :up
