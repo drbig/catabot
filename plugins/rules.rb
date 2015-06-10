@@ -49,7 +49,7 @@ module CataBot
           @@mutex.synchronize { @@voters.clear }
         end
 
-        HELP = 'Can do: rule give, rule add [text], rule vote [up|down] [id], rule about [id], rule del [id], rule stats, rule links'
+        HELP = 'Can do: rule give, rule show [id], rule add [text], rule vote [up|down] [id], rule about [id], rule del [id], rule stats, rule links'
         command(:rule, /rule ?(\w+)? ?(.*)?$/, 'rule [...]', HELP)
         def rule(m, cmd, rest)
           url = "#{CataBot.config['web']['url']}/rules"
@@ -69,6 +69,18 @@ module CataBot
             end
           when 'links'
             m.reply "See: #{url}/browse?channel=#{URI.encode(m.channel.to_s)} and/or #{url}/recent", true
+          when 'show'
+            id = rest
+            unless id =~ /^\d+$/
+              m.reply 'Sorry, id must be a number', true
+              return
+            end
+            rule = Rule.get(id.to_i)
+            unless rule
+              m.reply "Sorry, couldn't find rule (#{id})", true
+              return
+            end
+            m.reply "(#{rule.id}) #{rule.text}"
           when 'add'
             if rest.empty?
               m.reply 'Sorry, you need to specify a rule body', true
