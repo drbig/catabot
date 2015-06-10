@@ -14,6 +14,7 @@ plugins:
   - Memo
   - Links
   - Facts
+  - Rules
   - GitHub
   - Jenkins
   - Jq
@@ -29,6 +30,8 @@ params:
   links:
     expire: 6 months
   facts:
+    min_vote: -5
+  rules:
     min_vote: -5
   github:
     repo: CleverRaven/Cataclysm-DDA

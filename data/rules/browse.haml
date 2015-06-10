@@ -1,0 +1,46 @@
+!!!
+%html{:lang => "en"}
+  %head
+    %meta{:charset => "utf-8"}/
+    %title Rule browser
+    %link{:rel => "stylesheet", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"}/
+    %link{:rel => "stylesheet", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css"}/
+  %body
+    .container
+      %h3 Rule browser
+      %hr
+      %form.form-inline{:method => :get, :action => '#'}
+        .form-group
+          %label{:for => :channel} Channel
+          %select.form-control{:id => :channel, :name => :channel, :value => channel}
+            - channels.each do |c|
+              %option{:value => c, :selected => (c == channel)}= c
+          %button.btn.btn-default{:type => :submit} Filter
+      %hr
+      - if rules.any?
+        %table.table.table-striped
+          %thead
+            %tr
+              %th #
+              %th Score
+              %th Text
+              %th Who
+              %th When
+          %tbody
+            - rules.each do |f|
+              %tr
+                %td.center
+                  %b= f.id
+                %td.center
+                  - if f.score < 0
+                    %span{style: 'color: red;'}= f.score
+                  - else
+                    %span{style: 'color: green;'}= f.score
+                %td= f.text
+                %td= f.user.split('!').first
+                %td= f.stamp.utc.strftime('%Y-%m-%d %H:%M:%S %Z')
+      - else
+        %h4 No rules found.
+        %hr
+      %small
+        Made possible with Catabot #{CataBot.config['runtime']['version']}.

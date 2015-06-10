@@ -1,0 +1,40 @@
+!!!
+%html{:lang => "en"}
+  %head
+    %meta{:charset => "utf-8"}/
+    %title Recent rules
+    %link{:rel => "stylesheet", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"}/
+    %link{:rel => "stylesheet", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css"}/
+  %body
+    .container
+      %h3 Recent rules
+      %hr
+      - if recent.any?
+        %table.table.table-striped
+          %thead
+            %tr
+              %th #
+              %th Score
+              %th Text
+              %th Who
+              %th When
+              %th Where
+          %tbody
+            - recent.each do |r|
+              %tr
+                %td.center
+                  %b= r.id
+                %td.center
+                  - if r.score < 0
+                    %span{style: 'color: red;'}= r.score
+                  - else
+                    %span{style: 'color: green;'}= r.score
+                %td= r.text
+                %td= r.user.split('!').first
+                %td= r.stamp.utc.strftime('%Y-%m-%d %H:%M:%S %Z')
+                %td= r.channel
+      - else
+        %h4 No rules on record, yet.
+        %hr
+      %small
+        Made possible with Catabot #{CataBot.config['runtime']['version']}.
