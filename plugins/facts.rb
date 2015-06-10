@@ -54,8 +54,9 @@ module CataBot
         HELP = 'Can do: facts all [keyword], facts add [keyword] [text], facts vote [up|down] [id], facts about [id], facts del [id], facts stats, facts links'
         command(:facts, /facts ?(\w+)? ?(.*)?$/, 'facts [...]', HELP)
         def facts(m, cmd, rest)
+          url = "#{CataBot.config['web']['url']}/facts/browse"
           if !m.channel? && cmd != 'help' 
-            m.reply 'Facts work only in the context of a channel', true
+            m.reply "Use on a channel or via #{url}", true
             return
           end
           case cmd
@@ -72,7 +73,7 @@ module CataBot
               m.reply msg
             end
           when 'links'
-            m.reply "See: #{CataBot.config['web']['url']}/facts/browse?channel=#{URI.encode(m.channel.to_s)}", true
+            m.reply "See: #{url}?channel=#{URI.encode(m.channel.to_s)}", true
           when 'add'
             keyword, *text = rest.split(/\s+/)
             keyword.downcase!
