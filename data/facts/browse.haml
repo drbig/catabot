@@ -12,7 +12,9 @@
       %form.form-inline{:method => :get, :action => '#'}
         .form-group
           %label{:for => :channel} Channel
-          %input.form-control{:type => :text, :id => :channel, :name => :channel, :value => channel, :readonly => true}
+          %select.form-control{:id => :channel, :name => :channel, :value => channel}
+            - channels.each do |c|
+              %option{:value => c, :selected => (c == channel)}= c
           %label{:for => :keyword} Keyword
           %input.form-control{:type => :text, :id => :keyword, :name => :keyword, :value => keyword}
           %button.btn.btn-default{:type => :submit} Search

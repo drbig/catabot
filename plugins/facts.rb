@@ -33,10 +33,12 @@ module CataBot
           channel = URI.decode(params['channel'] || '')
           keyword = params['keyword']
           page = params['page'] || 1
+          chans = Fact.all(fields: [:channel], unique: true).map(&:channel)
           query = {channel: channel, order: [:stamp.desc]}
           query[:keyword.like] = URI.decode(keyword) if keyword && !keyword.empty?
           facts = Fact.all(query)
-          html = TEMPLATES[:browse].render(self, {facts: facts, channel: channel, keyword: keyword})
+          html = TEMPLATES[:browse].render(self, {facts: facts, channels: chans,
+                                                  channel: channel, keyword: keyword})
           reply(html, 200, {'Content-Type' => 'text/html'})
         end
       end
