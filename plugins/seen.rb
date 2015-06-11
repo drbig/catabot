@@ -58,7 +58,7 @@ module CataBot
         command(:seen, /seen (.*)$/, 'seen [nick]', 'Check last known presence of [nick]. Accepts wildcards')
         def seen(m, query)
           db_query = query.gsub('*', '%')
-          if ns = NickSeen.first(:nick.like => db_query)
+          if ns = NickSeen.first(:nick.like => db_query, order: [:stamp.desc])
             m.reply "Last seen #{ns.nick} #{ns.reply}", true
           else
             m.reply "Don't recall seeing #{query}", true
