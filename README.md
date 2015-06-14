@@ -30,6 +30,9 @@ Requires at least modern [Ruby](https://www.ruby-lang.org/en/), a bunch of GEMs 
    - Per-channel facts database with public adding and voting
    - Think of it as a simple keyword-based micro Wiki
    - Has web pages for searching per-channel and a global recent facts page
+ * Rules
+   - Very similar to Facts above, but no keywords and you ask for a random rule
+   - Quite useful e.g. for roguelike self-imposed challenges
  * GitHub
    - Quick IRC interface to a GitHub repository
    - Includes full-blown issue/pr search interface via IRC
@@ -44,7 +47,7 @@ Requires at least modern [Ruby](https://www.ruby-lang.org/en/), a bunch of GEMs 
 Most plugins adapt their output based on if asked on channel vs. via a privmsg.
 
 ```
-< user> help .*
+< user> help *
 <  bot> version - Tells you the version
 <  bot> plugins - Tells you what plugins are loaded
 <  bot> help - Tells you what commands are available
@@ -58,6 +61,7 @@ Most plugins adapt their output based on if asked on channel vs. via a privmsg.
 <  bot> jenkins [...] - Can do: jenkins last, jenkins recent, jenkins about [number]
 <  bot> time [zone] - Show current time in [zone]
 <  bot> facts [...] - Can do: facts all [keyword], facts add [keyword] [text], facts vote [up|down] [id], facts about [id], facts del [id], facts stats, facts links
+<  bot> rule [...] - Can do: rule give, rule show [id], rule add [text], rule vote [up|down] [id], rule about [id], rule del [id], rule stats, rule links
 ```
 
 ## Contributing
