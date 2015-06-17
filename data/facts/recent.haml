@@ -5,16 +5,19 @@
     %title Recent facts
     %link{:rel => "stylesheet", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"}/
     %link{:rel => "stylesheet", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css"}/
+    %link{:rel => "stylesheet", :href => "http://kaer.eu.org/~drbig/tablesorter.css"}/
+    %script{:src => "https://code.jquery.com/jquery-2.1.3.min.js"}
+    %script{:src => "https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.21.4/js/jquery.tablesorter.js"}
   %body
     .container
       %h3 Recent facts
       %hr
       - if recent.any?
-        %table.table.table-striped
+        %table.table.table-striped{:id => 'dataTable'}
           %thead
             %tr
-              %th #
-              %th Score
+              %th= '#&nbsp;&nbsp;'
+              %th= 'Pts&nbsp;&nbsp;'
               %th Keyword
               %th Text
               %th Who
@@ -30,13 +33,15 @@
                     %span{style: 'color: red;'}= r.score
                   - else
                     %span{style: 'color: green;'}= r.score
-                %td= r.keyword
+                %td.text-nowrap= r.keyword
                 %td= r.text
-                %td= r.user.split('!').first
-                %td= r.stamp.utc.strftime('%Y-%m-%d %H:%M:%S %Z')
+                %td.text-nowrap= r.user.split('!').first
+                %td.text-nowrap= r.stamp.utc.strftime('%Y-%m-%d %H:%M:%S %Z')
                 %td= r.channel
       - else
         %h4 No facts on record, yet.
         %hr
       %small
         Made possible with Catabot #{CataBot.config['runtime']['version']}.
+    %script
+      $(document).ready(function() { $("#dataTable").tablesorter(); });
