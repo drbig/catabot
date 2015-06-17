@@ -1,5 +1,6 @@
 ---
 runtime:
+  irc: true
   daemon: false
   pid_file: null
   logging:

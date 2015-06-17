@@ -143,18 +143,20 @@ module CataBot
       Rack::Handler::Thin.run(app, {:Host => host, :Port => port})
     end
 
-    self.log :info, 'Starting IRC bot...'
-    @@irc = Thread.new { @@bot.start }
+    if c['runtime']['irc']
+      self.log :info, 'Starting IRC bot...'
+      @@irc = Thread.new { @@bot.start }
 
-    if @@threads.any?
-      self.log :info, 'Starting auxillary threads...'
-      @@threads.each_pair do |k, v|
-        self.log :debug, "Starting '#{k}'..."
-        v[:thread] = Thread.new do
-          loop do
-            sleep(v[:period])
-            CataBot.log :debug, "Running #{k} aux thread..."
-            v[:block].call
+      if @@threads.any?
+        self.log :info, 'Starting auxillary threads...'
+        @@threads.each_pair do |k, v|
+          self.log :debug, "Starting '#{k}'..."
+          v[:thread] = Thread.new do
+            loop do
+              sleep(v[:period])
+              CataBot.log :debug, "Running #{k} aux thread..."
+              v[:block].call
+            end
           end
         end
       end
@@ -163,7 +165,7 @@ module CataBot
     @@web.join
     self.log :debug, 'Web thread ended...'
 
-    if @@threads.any?
+    if c['runtime']['irc'] && @@threads.any?
       self.log :info, 'Stopping auxillary threads...'
       @@threads.each_pair do |k, v|
         self.log :debug, "Stopping '#{k}'..."
