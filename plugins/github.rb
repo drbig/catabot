@@ -49,12 +49,20 @@ module CataBot
           end
         end
 
-        HELP = 'Can do: github pending, github recent, github link [number], github about [number], github search [query]'
+        HELP = 'Can do: github assigned, github pending, github recent, github link [number], github about [number], github search [query]'
         command(:github, /github ?(\w+)? ?(.*)?$/, 'github [...]', HELP)
         def github(m, cmd, rest)
           case cmd
           when 'help'
             m.reply HELP, true
+          when 'assigned'
+            query(m, "#{BASE}/search/issues", q: "repo:#{REPO} is:pr is:open assignee:*") do |res|
+              limit = m.channel? ? 3 : 10
+              m.reply 'Assigned open PRs:', true
+              res['items'].slice(0, limit).each do |i|
+                m.reply "##{i['number']} \"#{i['title']}\" by #{i['user']['login']}", true
+              end
+            end
           when 'pending'
             stamp = Chronic.parse('3 days ago').strftime('%Y-%m-%d')
             query(m, "#{BASE}/search/issues", q: "repo:#{REPO} is:pr is:open updated:>=#{stamp} NOT wip in:title") do |res|
