@@ -1,4 +1,4 @@
-# catabot
+# ![CopperTube](https://raw.github.com/drbig/catabot/master/assets/coppertube.png) catabot
 
 A plugin-based IRC bot framework that also provides easy Web interfaces and periodic code execution. Written in [Ruby](https://www.ruby-lang.org/en/) on top of [Cinch](https://github.com/cinchrb/cinch) (for IRC) and [Eldr](https://github.com/eldr-rb/eldr) (for Web). Comes with a number of useful and configurable plugins.
 
@@ -80,3 +80,4 @@ Standard two-clause BSD license, see LICENSE.txt for details.
 
 Copyright (c) 2015 Piotr S. Staszewski
 
+Awesome CopperTube image Copyright (c) 2015 Sean "Chezzo" Osman
