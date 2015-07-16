@@ -7,7 +7,7 @@ module CataBot
   module Plugin
     module Links
       SCHEMES = %w{http https ftp ftps}
-      TEMPLATE = Haml::Engine.new(File.read('data/links/last.haml'))
+      TEMPLATE = Haml::Engine.new(File.read('data/links/recent.haml'))
       EXPIRE = CataBot.config['params']['links']['expire']
 
       class Link
@@ -26,7 +26,7 @@ module CataBot
       end
 
       class App < Web::App
-        get '/last' do
+        get '/recent' do
           limit = params['limit'].to_i rescue 50
           limit = 50 if limit < 1 || limit > 256
           channel = params['channel']
@@ -107,7 +107,7 @@ module CataBot
         HELP = 'Can do: links recent, links about [link]'
         command(:links, /links ?(\w+)? ?(.*)?$/, 'links [...]', HELP)
         def links(m, cmd, rest)
-          url = "#{CataBot.config['web']['url']}/links/last"
+          url = "#{CataBot.config['web']['url']}/links/recent"
           case cmd
           when 'help'
             m.reply HELP, true
