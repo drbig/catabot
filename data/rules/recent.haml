@@ -3,6 +3,7 @@
   %head
     %meta{:charset => "utf-8"}/
     %title Recent rules
+    %link{href: '/assets/favicon.ico', rel: 'icon', type: 'image/x-icon'}/
     %link{:rel => "stylesheet", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"}/
     %link{:rel => "stylesheet", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css"}/
     %link{:rel => "stylesheet", :href => "http://kaer.eu.org/~drbig/tablesorter.css"}/
@@ -10,7 +11,9 @@
     %script{:src => "https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.21.4/js/jquery.tablesorter.js"}
   %body
     .container
-      %h3 Recent rules
+      %h3
+        %img{:src => '/assets/icon.png', :alt => 'CopperTube'}
+        Recent rules
       %hr
       - if recent.any?
         %table.table.table-striped{:id => 'dataTable'}

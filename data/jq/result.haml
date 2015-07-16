@@ -3,11 +3,14 @@
   %head
     %meta{:charset => "utf-8"}/
     %title JQ query results
+    %link{href: '/assets/favicon.ico', rel: 'icon', type: 'image/x-icon'}/
     %link{:rel => "stylesheet", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"}/
     %link{:rel => "stylesheet", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css"}/
   %body
     .container
-      %h3= query
+      %h3
+        %img{:src => '/assets/icon.png', :alt => 'CopperTube'}
+        = query
       %small against #{ver}
       %hr
       - if results['main'].any?
