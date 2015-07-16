@@ -24,6 +24,29 @@ module CataBot
   module Plugin
     module Base
       class App < Web::App
+        ASSETS = {
+          'favicon.ico'    => ['image/x-icon', File.read('assets/favicon.ico', mode: 'rb')],
+          'icon.png'       => ['image/png', File.read('assets/coppertube_small.png', mode: 'rb')],
+        }
+        EXPIRE = 3600*24*365
+
+        get '/assets/:name' do
+          name = params['name']
+          if ASSETS.has_key? name
+            type, data = ASSETS[name]
+            [200, {
+              'Content-Type'  => type,
+              'Cache-Control' => "max-age=#{EXPIRE}",
+            }, data]
+          else
+            [404, {'Content-Type' => 'text/plain'}, 'Not Found']
+          end
+        end
+
+        get '/favicon.ico' do
+          [302, {'location' => '/assets/favicon.ico'}, '']
+        end
+
         get '/plugins' do
           reply_ok({
             version: CataBot.config['runtime']['version'],
