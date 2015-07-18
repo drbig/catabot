@@ -91,8 +91,8 @@ module CataBot
                 CataBot.log :warn, 'Jenkins: Error parsing additional about data'
                 CataBot.log :exception, e
                 m.reply 'Sorry, something seems to have gone wrong. Things have been logged', true
-                end
               end
+            end
           when 'recent'
             query(m, URL) do |res|
               numbers = %w{lastBuild lastSuccessfulBuild}.map {|k| res[k]['number'] }
