@@ -22,6 +22,28 @@ module CataBot
         end
       end
 
+      class App < Web::App
+        get '/version/:build' do
+          unless bm = params['build'].match(/^#?(\d+)$/)
+            reply('Please use a valid Jenkins build number, e.g. 3245',
+                  200, {'Content-Type' => 'text/plain'})
+          else
+            number = bm.captures.first
+            _, msg = Jenkins.query("#{URL}/#{number}") do |res|
+              begin
+                res['actions'][3]['buildsByBranchName']['origin/master']['revision']['SHA1'].slice(0, 7)
+              rescue StandardError => e
+                CataBot.log :warn, 'Jenkins: Error parsing additional about data'
+                CataBot.log :exception, e
+                'Sorry, something seems to have gone wrong. Things have been logged'
+              end
+            end
+            reply(msg, 200, {'Content-Type' => 'text/plain'})
+          end
+        end
+      end
+      Web.mount('/jenkins', App)
+
       class IRC
         include CataBot::IRC::Plugin
 
