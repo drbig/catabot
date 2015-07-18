@@ -49,6 +49,8 @@
         %h4 No rules found.
         %hr
       %small
-        Made possible with Catabot #{CataBot.config['runtime']['version']}.
+        Made possible with
+        %a{href: 'https://github.com/drbig/catabot', target: '_blank'} Catabot
+        #{CataBot.config['runtime']['version']}.
     %script
       $(document).ready(function() { $("#dataTable").tablesorter(); });

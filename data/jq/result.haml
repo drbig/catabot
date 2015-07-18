@@ -53,4 +53,6 @@
         %hr
       %small
         Data compilation took #{Time.now - started} seconds.
-        Made possible with Catabot #{CataBot.config['runtime']['version']}.
+        Made possible with
+        %a{href: 'https://github.com/drbig/catabot', target: '_blank'} Catabot
+        #{CataBot.config['runtime']['version']}.
