@@ -6,6 +6,22 @@ module CataBot
       LIMIT = CataBot.config['params']['jenkins']['limit']
       URL = CataBot.config['params']['jenkins']['url']
 
+      def self.query(url, &blk)
+        begin
+          res = HTTParty.get(url + '/api/json')
+          CataBot.log :debug, "Jenkins query for #{url} code: #{res.code}"
+          if res.code == 200 && res.any?
+            [true, blk.call(res)]
+          else
+            [false, 'Sorry, seems I didn\'t get any results']
+          end
+        rescue StandardError => e
+          CataBot.log :error, "Something went wrong with a Jenkins query for '#{url}'"
+          CataBot.log :exception, e
+          [false, 'Sorry, something seems to have gone wrong. Things have been logged']
+        end
+      end
+
       class IRC
         include CataBot::IRC::Plugin
 
@@ -27,21 +43,9 @@ module CataBot
             @@queries[m.user.mask] = true
           end
 
-          begin
-            res = HTTParty.get(url + '/api/json')
-            CataBot.log :debug, "Jenkins query for #{url} code: #{res.code}"
-            if res.code == 200 && res.any?
-              blk.call(res)
-            else
-              m.reply 'Sorry, seems I didn\'t get any results', true
-            end
-          rescue StandardError => e
-            CataBot.log :error, "Something went wrong with a Jenkins query for '#{url}'"
-            CataBot.log :exception, e
-            m.reply 'Sorry, something seems to have gone wrong. Things have been logged', true
-          ensure
-            @@mutex.synchronize { @@queries.delete(m.user.mask) }
-          end
+          success, msg = Jenkins.query(url, &blk)
+          m.reply msg, true unless success
+          @@mutex.synchronize { @@queries.delete(m.user.mask) }
         end
 
         HELP = 'Can do: jenkins last, jenkins recent, jenkins about [number]'
