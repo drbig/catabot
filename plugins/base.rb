@@ -6,7 +6,7 @@ module CataBot
 
       def self.included(recv)
         recv.include(Cinch::Plugin)
-        recv.set(:prefix, /^#{CataBot.config['irc']['nick']}.? /i)
+        recv.set(:prefix, /^#{CataBot.config['irc']['nick']}_*.? /i)
 
         recv.extend(Methods)
       end
@@ -63,6 +63,7 @@ module CataBot
         def setup(m)
           User('Nickserv').send("IDENTIFY #{CataBot.config['irc']['pass']}")
           # TODO: if we can't get our config nick die or update the config...
+          # Should handle underscores now.
         end
 
         command(:version, /version$/, 'version', 'Tells you the version')
