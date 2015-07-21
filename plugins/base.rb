@@ -6,7 +6,7 @@ module CataBot
 
       def self.included(recv)
         recv.include(Cinch::Plugin)
-        recv.set(:prefix, /#{CataBot.config['irc']['nick']}.? /i)
+        recv.set(:prefix, /^#{CataBot.config['irc']['nick']}.? /i)
 
         recv.extend(Methods)
       end
