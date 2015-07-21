@@ -85,7 +85,11 @@ module CataBot
           cmd = arg.downcase
           matches = CataBot::IRC.cmds.keys.select {|k| k.match(/^#{cmd}.*/) }
           if matches.any?
-            matches.each {|k| m.reply "#{k} - #{CataBot::IRC.cmds[k]}", true }
+            if matches.length > 1 && m.channel?
+              m.reply 'Don\'t want to spam here, better ask me via /msg', true
+            else
+              matches.each {|k| m.reply "#{k} - #{CataBot::IRC.cmds[k]}", true }
+            end
           else
             m.reply 'Can\'t help you with that', true
           end
