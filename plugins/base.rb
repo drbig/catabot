@@ -101,6 +101,11 @@ module CataBot
           CataBot.stop! if ADMIN.match(m.user.mask)
         end
 
+        command(:admin_renick, /renick (.+)$/)
+        def admin_renick(m, arg)
+          CataBot.bot.nick = arg if ADMIN.match(m.user.mask)
+        end
+
         command(:source, /source$/, 'source', 'Gives you the link to my source code')
         def source(m)
           m.reply "My code is at: #{SOURCE}", true
