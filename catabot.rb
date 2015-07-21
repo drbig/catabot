@@ -18,6 +18,7 @@ module CataBot
   def self.config; @@config; end
   def self.config=(obj); @@config = obj; end
   def self.log(level, msg); @@config[:logger].send(level, msg) if @@config[:logger]; end
+  def self.bot; @@bot; end
 
   @@threads = Hash.new
   def self.aux_thread(id, period, &blk)
