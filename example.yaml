@@ -35,11 +35,11 @@ params:
   rules:
     min_vote: -5
   github:
-    repo: CleverRaven/Cataclysm-DDA
+    repo: user/repo
     agent: drbig/catabot
     limit: 3
   jenkins:
-    url: http://ci.narc.ro/view/Cataclysm-DDA/job/Cataclysm-Matrix
+    url: http://ci.example.org/view/X/job/Y
     limit: 5
   jq:
     data: ~/path/json/data
