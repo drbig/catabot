@@ -1,0 +1,49 @@
+!!!
+%html{:lang => "en"}
+  %head
+    %meta{:charset => "utf-8"}/
+    %title Log snippets browser
+    %link{href: '/assets/favicon.ico', rel: 'icon', type: 'image/x-icon'}/
+    %link{:rel => "stylesheet", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"}/
+    %link{:rel => "stylesheet", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css"}/
+    %link{:rel => "stylesheet", :href => "http://kaer.eu.org/~drbig/tablesorter.css"}/
+    %script{:src => "https://code.jquery.com/jquery-2.1.3.min.js"}
+    %script{:src => "https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.21.4/js/jquery.tablesorter.js"}
+  %body
+    .container
+      %h3
+        %img{:src => '/assets/icon.png', :alt => 'CopperTube'}
+        Log snippets browser
+      %hr
+      %form.form-inline{:method => :get, :action => '#'}
+        .form-group
+          %label{:for => :channel} Channel
+          %select.form-control{:id => :channel, :name => :channel, :value => channel}
+            - channels.each do |c|
+              %option{:value => c, :selected => (c == channel)}= c
+          %button.btn.btn-default{:type => :submit} Search
+      %hr
+      - if snippets.any?
+        %table.table.table-striped{:id => 'dataTable'}
+          %thead
+            %tr
+              %th Name
+              %th Covers
+              %th Who
+              %th When
+          %tbody
+            - snippets.each do |s|
+              %tr
+                %td.text-nowrap= s.name
+                %td #{s.from.strftime('%Y-%m-%d %H:%M')} - #{s.to.strftime('%Y-%m-%d %H:%M')}
+                %td.text-nowrap= s.user.split('!').first
+                %td.text-nowrap= s.stamp.utc.strftime('%Y-%m-%d %H:%M:%S %Z')
+      - else
+        %h4 No snippets found.
+        %hr
+      %small
+        Made possible with
+        %a{href: 'https://github.com/drbig/catabot', target: '_blank'} Catabot
+        #{CataBot.config['runtime']['version']}.
+    %script
+      $(document).ready(function() { $("#dataTable").tablesorter(); });
