@@ -2,6 +2,11 @@ require 'chronic'
 require 'tzinfo'
 require 'uri'
 
+# TODO: Make target link structure configurable.
+# As of now the target link format is hardcoded for my ChatLogger.
+# This is why this plugin is unlisted in README.
+# Also when this is made general perhaps give it a better name.
+
 module CataBot
   module Plugin
     module Logger
