@@ -35,7 +35,7 @@
             - snippets.each do |s|
               %tr
                 %td.text-nowrap
-                  %a{:href => "go/#{s.name}"}= s.name
+                  %a{:href => s.redir_link}= s.name
                 %td #{s.from.strftime('%Y-%m-%d %H:%M:%S %Z')} - #{s.to.strftime('%Y-%m-%d %H:%M:%S %Z')}
                 %td.text-nowrap= s.user.split('!').first
                 %td.text-nowrap= s.stamp.utc.strftime('%Y-%m-%d %H:%M:%S %Z')

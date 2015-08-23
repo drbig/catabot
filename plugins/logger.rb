@@ -13,7 +13,8 @@ module CataBot
       class Snippet
         include DataMapper::Resource
 
-        property :name, String, length: 1..64, key: true
+        property :id, Serial
+        property :name, String, length: 1..64, required: true
         property :from, Time, required: true
         property :to, Time, required: true
 
@@ -28,13 +29,14 @@ module CataBot
         end
 
         def redir_link
-          URI.join(CataBot.config['web']['url'], "logger/go/#{self.name}").to_s
+          link = "/logger/go/#{URI.encode(self.channel.to_s)}/#{self.name}"
+          CataBot.config['web']['url'] + link
         end
       end
 
       class App < Web::App
-        get '/go/:name' do
-          snippet = Snippet.get(params['name'])
+        get '/go/:channel/:name' do
+          snippet = Snippet.first(name: params['name'], channel: params['channel'])
           if snippet
             [302, {location: snippet.target_link}, ['Off you go!']]
           else
@@ -74,7 +76,7 @@ module CataBot
               m.reply 'Syntax error... Please read help and try again :)', true
               return
             end
-            if Snippet.get(name)
+            if Snippet.first(name: name, channel: m.channel)
               m.reply "Sorry, already recorded #{name}. Try another name or delete the existning one?", true
               return
             end
@@ -101,7 +103,7 @@ module CataBot
               m.reply 'Sorry, name must be a string', true
               return
             end
-            snippet = Snippet.get(name)
+            snippet = Snippet.first(name: name, channel: m.channel)
             unless snippet
               m.reply "Sorry, couldn't find snippet #{name}", true
               return
@@ -113,7 +115,7 @@ module CataBot
               m.reply 'Sorry, name must be a string', true
               return
             end
-            snippet = Snippet.get(name)
+            snippet = Snippet.first(name: name, channel: m.channel)
             unless snippet
               m.reply "Sorry, couldn't find snippet #{name}", true
               return
@@ -126,7 +128,7 @@ module CataBot
               m.reply 'Sorry, name must be a string', true
               return
             end
-            snippet = Snippet.get(name)
+            snippet = Snippet.first(name: name, channel: m.channel)
             unless snippet
               m.reply "Sorry, couldn't find snippet #{name}", true
               return
