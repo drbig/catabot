@@ -14,6 +14,7 @@ plugins:
   - Seen
   - Memo
   - Links
+  - Logger
   - Facts
   - Rules
   - GitHub
@@ -30,6 +31,10 @@ params:
     expire: 1 week
   links:
     expire: 6 months
+  logger:
+    url: "http://example.com/%{channel}/%{from}/%{to}"
+    stamp_fmt: "%Y-%m-%d %H:%M"
+    timezone: Europe/Warsaw
   facts:
     min_vote: -5
   rules:
