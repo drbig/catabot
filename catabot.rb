@@ -17,6 +17,12 @@ module CataBot
   @@config = Hash.new
   def self.config; @@config; end
   def self.config=(obj); @@config = obj; end
+  # TODO: Add more statistics
+  # Things like commands processed, errors encountered etc.
+  # Also add a web hook for getting all of this in JSON.
+  @@stats = Hash.new
+  def self.stats; @@stats; end
+  def self.stats=(obj); @@stats = obj; end
   def self.log(level, msg); @@config[:logger].send(level, msg) if @@config[:logger]; end
   def self.bot; @@bot; end
 
@@ -84,6 +90,7 @@ module CataBot
   end
 
   def self.fire!
+    @@stats[:started] = Time.now
     c = @@config
 
     unless c['runtime']['version']

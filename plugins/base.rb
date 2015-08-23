@@ -76,6 +76,16 @@ module CataBot
           m.reply "I have loaded: #{CataBot.config['plugins'].join(', ')}", true
         end
 
+        command(:source, /source$/, 'source', 'Gives you the link to my source code')
+        def source(m)
+          m.reply "My code is at: #{SOURCE}", true
+        end
+
+        command(:uptime, /uptime$/, 'uptime', 'Tells you bot uptime stats')
+        def uptime(m)
+          m.reply "Been running since #{CataBot.stats[:started].strftime('%Y-%m-%d %H:%M:%S %Z')}", true
+        end
+
         command(:help_global, /help$/, 'help', 'Tells you what commands are available')
         def help_global(m)
           m.reply "I can reply to: #{CataBot::IRC.cmds.keys.sort.join(', ')}", true
@@ -104,11 +114,6 @@ module CataBot
         command(:admin_renick, /renick (.+)$/)
         def admin_renick(m, arg)
           CataBot.bot.nick = arg if ADMIN.match(m.user.mask)
-        end
-
-        command(:source, /source$/, 'source', 'Gives you the link to my source code')
-        def source(m)
-          m.reply "My code is at: #{SOURCE}", true
         end
       end
     end
