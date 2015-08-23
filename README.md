@@ -2,7 +2,7 @@
 
 A plugin-based IRC bot framework that also provides easy Web interfaces and periodic code execution. Written in [Ruby](https://www.ruby-lang.org/en/) on top of [Cinch](https://github.com/cinchrb/cinch) (for IRC) and [Eldr](https://github.com/eldr-rb/eldr) (for Web). Comes with a number of useful and configurable plugins.
 
-Current status: *look good*
+Current status: *works great*
 
 Configuration is done via a single [YAML](http://yaml.org/) file, see `example.yaml`.
 
@@ -26,6 +26,10 @@ Requires at least modern [Ruby](https://www.ruby-lang.org/en/), a bunch of GEMs 
    - Gather links posted to channels
    - Includes link checking to provided page title where possible
    - Has a web page for recent links with channel filtering
+ * Logger
+   - Create time-based links to a web IRC log frontend
+   - Per-channel snippets, fully configurable target link formatting
+   - Example log browser that works well with this: [ChatLogger](https://github.com/drbig/chatlogger)
  * Facts
    - Per-channel facts database with public adding and voting
    - Think of it as a simple keyword-based micro Wiki
@@ -50,9 +54,10 @@ Most plugins adapt their output based on if asked on channel vs. via a privmsg.
 < user> help *
 <  bot> version - Tells you the version
 <  bot> plugins - Tells you what plugins are loaded
+<  bot> source - Gives you the link to my source code
+<  bot> uptime - Tells you bot uptime stats
 <  bot> help - Tells you what commands are available
 <  bot> help [command] - Tells you basic [command] help
-<  bot> source - Gives you the link to my source code
 <  bot> seen [nick] - Check last known presence of [nick]. Accepts wildcards
 <  bot> memo [...] - Can do: memo pending, memo tell [nick] [message], memo forget [nick]
 <  bot> links [...] - Can do: links recent, links about [link]
@@ -62,6 +67,7 @@ Most plugins adapt their output based on if asked on channel vs. via a privmsg.
 <  bot> time [zone] - Show current time in [zone]
 <  bot> facts [...] - Can do: facts all [keyword], facts add [keyword] [text], facts vote [up|down] [id], facts about [id], facts del [id], facts stats, facts links
 <  bot> rule [...] - Can do: rule give, rule show [id], rule add [text], rule vote [up|down] [id], rule about [id], rule del [id], rule stats, rule links
+<  bot> log [...] - Can do: log since [x minutes ago] as [name], log for [name], log about [name], log del [name], log links
 ```
 
 ## Contributing
