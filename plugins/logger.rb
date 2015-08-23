@@ -2,23 +2,18 @@ require 'chronic'
 require 'tzinfo'
 require 'uri'
 
-# TODO: Make target link structure configurable.
-# As of now the target link format is hardcoded for my ChatLogger.
-# This is why this plugin is unlisted in README.
-# Also when this is made general perhaps give it a better name.
-
 module CataBot
   module Plugin
     module Logger
       TEMPLATE = Haml::Engine.new(File.read('data/logger/browse.haml'))
-      URL =  CataBot.config['params']['logger']['url']
+      URL = CataBot.config['params']['logger']['url']
+      STAMP_FMT = CataBot.config['params']['logger']['stamp_fmt']
       TZ = TZInfo::Timezone.get(CataBot.config['params']['logger']['timezone'])
 
       class Snippet
         include DataMapper::Resource
 
         property :name, String, length: 1..64, key: true
-        property :path, String, length: 1..256, required: true, unique: true
         property :from, Time, required: true
         property :to, Time, required: true
 
@@ -27,7 +22,9 @@ module CataBot
         property :stamp, Time, default: Proc.new { Time.now }, required: true
 
         def target_link
-          URI.join(URL, self.path).to_s
+          from = self.from.strftime(STAMP_FMT)
+          to = self.to.strftime(STAMP_FMT)
+          URL % {channel: URI.encode(self.channel.to_s), from: from, to: to}
         end
 
         def redir_link
@@ -89,11 +86,8 @@ module CataBot
               return
             end
             from = TZ.utc_to_local(from.utc)
-            from_str = from.strftime('%Y-%m-%d %H:%M')
             to = TZ.utc_to_local(Time.now.utc)
-            to_str = to.strftime('%Y-%m-%d %H:%M')
-            path = '/' + ([m.channel.to_s, from_str, to_str].map {|x| URI.encode(x) }.join('/'))
-            snippet = Snippet.new(name: name, path: path, from: from, to: to,
+            snippet = Snippet.new(name: name, from: from, to: to,
                                   channel: m.channel, user: m.user.mask)
             unless snippet.save
               CataBot.log :error, "Logger: Error saving new: #{snippet}!"
@@ -125,7 +119,7 @@ module CataBot
               return
             end
             m.reply "#{name} by #{Cinch::Mask.new(snippet.user).nick} added on #{snippet.stamp.utc.strftime('%Y-%m-%d %H:%M:%S UTC')}"
-            m.reply "it covers #{snippet.from.strftime('%Y-%m-%d %H:%M')} - #{snippet.to.strftime('%Y-%m-%d %H:%M')}"
+            m.reply "it covers #{snippet.from.strftime('%Y-%m-%d %H:%M:%S %Z')} - #{snippet.to.strftime('%Y-%m-%d %H:%M:%S %Z')}"
           when 'del'
             name = rest
             unless name =~ /^\S+$/
