@@ -115,6 +115,11 @@ module CataBot
         def admin_renick(m, arg)
           CataBot.bot.nick = arg if ADMIN.match(m.user.mask)
         end
+
+        command(:admin_gc, /run_gc$/)
+        def admin_gc(m)
+          GC.start if ADMIN.match(m.user.mask)
+        end
       end
     end
   end
