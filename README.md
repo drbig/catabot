@@ -84,6 +84,6 @@ Follow the usual GitHub workflow:
 
 Standard two-clause BSD license, see LICENSE.txt for details.
 
-Copyright (c) 2015 Piotr S. Staszewski
+Copyright (c) 2015 - 2016 Piotr S. Staszewski
 
 Awesome CopperTube image Copyright (c) 2015 Sean "Chezzo" Osman
