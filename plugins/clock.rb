@@ -21,6 +21,26 @@ module CataBot
           end
         end
 
+        command(:time_convert, /time from (.*) to (.*)$/, 'time from [(yyyy-mm-dd) hh:mm(:ss) where|zone] to [where|zone]', 'Convert time from origin to target time zone/place (case-sensitive!)')
+        def time_convert(m, from, to)
+          begin
+            time = Time.parse(from)
+          rescue ArgumentError
+            m.reply "Didn't understand '#{from}', try e.g. '19:00 CET'", true
+            return
+          end
+
+          to = clean_time_string(to)
+          begin
+            zone = TZInfo::Timezone.get(to)
+          rescue TZInfo::InvalidTimezoneIdentifier
+            m.reply "Couldn't understand '#{to}', try e.g. CET or US/Pacific", true
+          else
+            time_there = time.utc + zone.transitions_up_to(Time.now).last.offset.utc_offset
+            m.reply "it'll be #{time_there.strftime('%H:%M:%S (%Y-%m-%d)')} there"
+          end
+        end
+
         private
         def clean_time_string(string)
           cleaned = string.gsub(' ', '_').downcase
