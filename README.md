@@ -14,7 +14,8 @@ Requires at least modern [Ruby](https://www.ruby-lang.org/en/), a bunch of GEMs 
    - Basic infrastructure for other plugins
    - Common help system and bot-wide commands
  * Clock
-   - Show current time in a different timezone
+   - Show current time in different timezones/places
+   - Also convert (date) times between timezones/places
  * Seen
    - Show last time the bot has seen a nick
    - Supports wildcards
@@ -49,6 +50,8 @@ Requires at least modern [Ruby](https://www.ruby-lang.org/en/), a bunch of GEMs 
    - Results shown via web interface
 
 Most plugins adapt their output based on if asked on channel vs. via a privmsg.
+
+Here's just a _sample_:
 
 ```
 < user> help *
