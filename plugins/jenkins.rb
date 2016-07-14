@@ -31,7 +31,7 @@ module CataBot
             number = bm.captures.first
             _, msg = Jenkins.query("#{URL}/#{number}") do |res|
               begin
-                res['actions'][3]['buildsByBranchName']['origin/master']['revision']['SHA1'].slice(0, 7)
+                res['actions'][4]['buildsByBranchName']['origin/master']['revision']['SHA1'].slice(0, 7)
               rescue StandardError => e
                 CataBot.log :warn, 'Jenkins: Error parsing additional about data'
                 CataBot.log :exception, e
@@ -108,10 +108,10 @@ module CataBot
             else
               number = rm.captures.first
               query(m, "#{URL}/#{number}") do |res|
-                m.reply "##{number} #{res['result']} \"#{res['actions'][0]['causes'][0]['shortDescription']}\"", true
+                m.reply "##{number} #{res['result']} \"#{res['actions'][1]['causes'][0]['shortDescription']}\"", true
                 begin
                   culprits = res['culprits'].map {|x| x['fullName'] }.join(', ')
-                  commitish = 'g' + res['actions'][3]['buildsByBranchName']['origin/master']['revision']['SHA1'].slice(0, 7)
+                  commitish = 'g' + res['actions'][4]['buildsByBranchName']['origin/master']['revision']['SHA1'].slice(0, 7)
                   stamp = Time.at(res['timestamp'].to_f / 1000.0).utc.strftime('%Y-%m-%d %H:%M:%S %Z')
                   m.reply "culprits: #{culprits}; at #{commitish} on #{stamp}", true 
                 rescue StandardError => e
