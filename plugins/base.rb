@@ -106,6 +106,13 @@ module CataBot
           end
         end
 
+        command(:admin_join, /join (.+)$/)
+        def admin_join(m, args)
+          chan, key = args.split(' ', 2)
+          key = nil if key == ''
+          CataBot.bot.join(chan, key)
+        end
+
         command(:admin_quit, /quit$/)
         def admin_quit(m)
           CataBot.stop! if ADMIN.match(m.user.mask)
