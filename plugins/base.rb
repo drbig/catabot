@@ -62,6 +62,13 @@ module CataBot
         listen_to :connect, method: :setup
         def setup(m)
           User('Nickserv').send("IDENTIFY #{CataBot.config['irc']['pass']}")
+          # FIXME: This seems to run independent of the channels to join
+          #        from the main config (c['irc']['channels']), so for channels
+          #        that require being identified... well, you will or won't
+          #        join them... A race condition indeed.
+          #        Either do joins here after ensuring authed, or try to delay
+          #        the internal Cinch auto-join.
+          #
           # TODO: if we can't get our config nick die or update the config...
           # Should handle underscores now.
         end
