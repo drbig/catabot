@@ -80,7 +80,7 @@ module CataBot
                 title = nil
                 begin
                   u = URI.parse(url)
-                  Net::HTTP.start(u.host, u.port) do |h|
+                  Net::HTTP.start(u.host, u.port, :use_ssl => u.scheme == 'https') do |h|
                     res = h.head(u.request_uri)
                     if res['content-type'].match(/text\/html/)
                       res = h.get(u.request_uri)
