@@ -113,7 +113,7 @@ module CataBot
             m.reply HELP, true
           when 'recent'
             if m.channel?
-              m.reply "#{url}?chan=#{URI.encode(m.channel.to_s)}", true
+              m.reply "#{url}?channel=#{URI.encode(m.channel.to_s)}", true
             else
               links = Link.all(order: [:stamp.desc], limit: 10)
               if links.any?
