@@ -17,15 +17,15 @@ module CataBot
         end
 
         def format_full
-          "(#{self.id}) #{self.text}"
+          "#{format_id} #{self.text}"
         end
 
         def format_short
-          "(#{self.id}) added on #{self.stamp}"
+          "#{format_id} added on #{self.stamp}"
         end
 
         def format_info
-          "(#{self.id}) added on #{self.stamp} by #{self.user.split('!')[0]}"
+          "#{format_id} added on #{self.stamp} by #{self.user.split('!').first}"
         end
       end
 
@@ -122,7 +122,7 @@ module CataBot
             return unless has_quotes(m)
             count = Quote.count(channel: m.channel)
             quote = Quote.last(channel: m.channel)
-            m.reply "I've memorised #{count} quotes, last one was #{quote.format_short}"
+            m.reply "I've memorised #{count} quote(s), last one was #{quote.format_short}"
           when 'del'
             return unless has_quotes(m)
             unless rest =~ /^\d+$/
