@@ -38,7 +38,7 @@
               %tr
                 %td.center
                   %b= q.id
-                %td= q.text
+                %td&= q.text
                 %td.text-nowrap= q.user.split('!').first
                 %td.text-nowrap= q.stamp.utc.strftime('%Y-%m-%d %H:%M:%S %Z')
       - else

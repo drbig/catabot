@@ -45,8 +45,8 @@
                     %span{style: 'color: red;'}= f.score
                   - else
                     %span{style: 'color: green;'}= f.score
-                %td.text-nowrap= f.keyword
-                %td= f.text
+                %td.text-nowrap&= f.keyword
+                %td&= f.text
                 %td.text-nowrap= f.user.split('!').first
                 %td.text-nowrap= f.stamp.utc.strftime('%Y-%m-%d %H:%M:%S %Z')
       - else
