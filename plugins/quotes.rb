@@ -22,16 +22,20 @@ module CataBot
           "(#{self.id})"
         end
 
+        def format_stamp
+          self.stamp.utc.strftime('%Y-%m-%d %H:%M:%S UTC')
+        end
+
         def format_full
           "#{format_id} #{self.text}"
         end
 
         def format_short
-          "#{format_id} added on #{self.stamp}"
+          "#{format_id} added on #{format_stamp}"
         end
 
         def format_info
-          "#{format_id} added on #{self.stamp} by #{self.user.split('!').first}"
+          "#{format_id} added on #{format_stamp} by #{self.user.split('!').first}"
         end
       end
 
