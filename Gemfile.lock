@@ -5,6 +5,8 @@ GEM
     chronic (0.10.2)
     cinch (2.2.5)
     daemons (1.2.2)
+    dm-aggregates (1.2.0)
+      dm-core (~> 1.2.0)
     dm-core (1.2.1)
       addressable (~> 2.3)
     dm-migrations (1.2.0)
@@ -21,13 +23,13 @@ GEM
       json (~> 1.8)
       multi_xml (>= 0.5.2)
     json (1.8.3)
-    mini_portile (0.6.2)
+    mini_portile2 (2.3.0)
     multi_xml (0.5.5)
     mustermann (0.4.0)
       tool (~> 0.2)
-    nokogiri (1.6.6.2)
-      mini_portile (~> 0.6.0)
-    rack (1.6.1)
+    nokogiri (1.8.4)
+      mini_portile2 (~> 2.3.0)
+    rack (1.6.10)
     thin (1.6.3)
       daemons (~> 1.0, >= 1.0.9)
       eventmachine (~> 1.0)
@@ -47,6 +49,7 @@ DEPENDENCIES
   addressable
   chronic
   cinch
+  dm-aggregates
   dm-core
   dm-migrations
   eldr
@@ -60,4 +63,4 @@ DEPENDENCIES
   tzinfo-data
 
 BUNDLED WITH
-   1.10.3
+   1.16.4
