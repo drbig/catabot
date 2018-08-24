@@ -73,7 +73,7 @@ module CataBot
           false
         end
 
-        HELP = 'Can do: quote random, quote last, quote like [text], quote get [id], quote about [id], quote del [id], quote stats, quote links'
+        HELP = 'Can do: quote random, quote last, quote add [text], quote like [text], quote get [id], quote about [id], quote del [id], quote stats, quote links'
         command(:quote, /quote ?(\w+)? ?(.*)?$/, 'quote [...]', HELP)
         def quote(m, cmd, rest)
           url = "#{CataBot.config['web']['url']}#{App::MOUNT_AT}"
