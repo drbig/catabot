@@ -1,6 +1,12 @@
+require 'uri'
+
 module CataBot
   module Plugin
     module Quotes
+      TEMPLATES = Hash[Dir.glob('data/quotes/*.haml').collect do |p|
+        name = File.basename(p, '.haml').to_sym
+        [name, Haml::Engine.new(File.read(p))]
+      end]
 
       class Quote
         include DataMapper::Resource
@@ -29,6 +35,30 @@ module CataBot
         end
       end
 
+      class App < Web::App
+        MOUNT_AT = '/quotes'
+
+        get '/recent' do
+          recent = Quote.all(order: [:stamp.desc], limit: 50)
+          html = TEMPLATES[:recent].render(self, {recent: recent})
+          reply(html, 200, {'Content-Type' => 'text/html'})
+        end
+
+        get '/browse' do
+          channel = URI.decode(params['channel'] || '')
+          search = params['search']
+          page = params['page'] || 1
+          chans = Quote.all(fields: [:channel], unique: true).map(&:channel)
+          query = {channel: channel, order: [:stamp.desc]}
+          query[:text.like] = "%#{URI.decode(search)}%" if search && !search.empty?
+          quotes = Quote.all(query)
+          html = TEMPLATES[:browse].render(self, {quotes: quotes, channels: chans,
+                                                  channel: channel, search: search})
+          reply(html, 200, {'Content-Type' => 'text/html'})
+        end
+      end
+      Web.mount(App::MOUNT_AT, App)
+
       class IRC
         include CataBot::IRC::Plugin
 
@@ -39,16 +69,19 @@ module CataBot
           false
         end
 
-        HELP = 'Can do: quote random, quote last, quote like [text], quote get [id], quote about [id], quote del [id], quote stats'
+        HELP = 'Can do: quote random, quote last, quote like [text], quote get [id], quote about [id], quote del [id], quote stats, quote links'
         command(:quote, /quote ?(\w+)? ?(.*)?$/, 'quote [...]', HELP)
         def quote(m, cmd, rest)
+          url = "#{CataBot.config['web']['url']}#{App::MOUNT_AT}"
           if !m.channel? && cmd != 'help'
-            m.reply 'Use on a channel', true
+            m.reply "Use on a channel or via #{url}/browse", true
             return
           end
           case cmd
           when 'help'
             m.reply HELP, true
+          when 'links'
+            m.reply "See: #{url}/browse?channel=#{URI.encode(m.channel.to_s)} and/or #{url}/recent", true
           when 'add'
             if rest.empty?
               m.reply "I do need that quote first...", true
