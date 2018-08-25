@@ -177,7 +177,7 @@ module CataBot
           end
         end
 
-        CataBot.aux_thread(:rules_clean, 24 * 60 * 60) { IRC.reset_voters! }
+        CataBot.aux_thread_midnight(:rules_clean) { IRC.reset_voters! }
       end
     end
   end
