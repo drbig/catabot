@@ -41,6 +41,13 @@ module CataBot
     self._add_aux_thread(id, :midnight, nil, &blk)
   end
 
+
+  @@finalizers = Hash.new
+  def self.finalizer(id, &blk)
+    raise Error, "Finalizer '#{id}' already defined." if @@finalizers.has_key? id
+    @@finalizers[id] = blk
+  end
+
   module IRC
     @@cmds = Hash.new
     def self.cmds; @@cmds; end
@@ -195,6 +202,15 @@ module CataBot
         Thread.kill(v[:thread])
       end
     end
+
+    if c['runtime']['irc'] && @@finalizers.any?
+      self.log :info, 'Running plugin finalizers...'
+      @@finalizers.each_pair do |k, v|
+        self.log :debug, "Finalizing '#{k}'..."
+        v.call
+      end
+    end
+
   end
 
   def self.stop!
