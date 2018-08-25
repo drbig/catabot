@@ -28,10 +28,17 @@ module CataBot
   def self.bot; @@bot; end
 
   @@threads = Hash.new
-  def self.aux_thread(id, period, &blk)
+  def self._add_aux_thread(id, type, arg, &blk)
     raise Error, "Thread '#{id}' already defined." if @@threads.has_key? id
     raise Error, 'No block given.' if blk.nil?
-    @@threads[id] = {block: blk, period: period, thread: nil}
+    @@threads[id] = {type: type, arg: arg, block: blk, thread: nil}
+  end
+  def self.aux_thread_every(id, period, &blk)
+    raise Error, 'Period has to be numeric.' unless period.is_a? Numeric
+    self._add_aux_thread(id, :periodic, period, &blk)
+  end
+  def self.aux_thread_midnight(id, &blk)
+    self._add_aux_thread(id, :midnight, nil, &blk)
   end
 
   module IRC
@@ -162,7 +169,14 @@ module CataBot
           self.log :debug, "Starting '#{k}'..."
           v[:thread] = Thread.new do
             loop do
-              sleep(v[:period])
+              case v[:type]
+              when :periodic
+                sleep_for = v[:arg]
+              when :midnight
+                now = Time.now.utc
+                sleep_for = (24 * 60 * 60) - (now.hour * 60 * 60 + now.min * 60 + now.sec)
+              end
+              sleep(sleep_for)
               CataBot.log :debug, "Running #{k} aux thread..."
               v[:block].call
             end
