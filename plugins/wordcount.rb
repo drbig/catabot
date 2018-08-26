@@ -34,14 +34,52 @@ module CataBot
           data[:mutex].synchronize { data[:today] += word_count }
         end
 
-        HELP = '???'
-        command(:words, /words ?(\w+)$/, 'words [...]', HELP)
-        def words(m, cmd)
+        HELP = 'Can do: words place (nick), words ttop10, words top10'
+        command(:words, /words ?(\w+) ?(\w+)?\s*?$/, 'words [...]', HELP)
+        def words(m, cmd, rest)
+          if !m.channel? && cmd != 'help'
+            m.reply 'Use on a channel', true
+            return
+          end
           case cmd
+          when 'help'
+            m.reply HELP, true
+          when 'place'
+            data = get_ranking(m.channel)
+            nick = rest || m.user.nick
+            place = data.find_index {|e| e.first == nick}
+            if !place
+              m.reply "Sorry, don't know #{nick}...", true
+              return
+            end
+            words = data[place].last
+            m.reply "#{nick} is \##{place+1} (with #{words} word(s))"
+          when 'top10'
+            data = get_ranking(m.channel)
+            msg = data[0..9].each_with_index.map {|(nick, count), idx| "#{idx+1}. #{nick} (#{count})" }.join(', ')
+            m.reply "Overall top 10: #{msg}"
           when 'debug'
             data = @@counters[m.channel][m.user.nick]
             data[:mutex].synchronize { m.reply data, true }
           end
+        end
+
+        def get_ranking(chan)
+          today = Time.now.utc.to_date
+          data = Counter.aggregate(:nick, :words.sum, :conditions => {:channel => chan, :date.lt => today})
+          @@top_mutex.synchronize do
+            if @@counters.has_key? chan
+              @@counters[chan].each_pair do |t_nick, t_data|
+                idx = data.find_index {|e| e.first == t_nick}
+                if idx
+                  data[idx][1] += t_data[:today]
+                else
+                  data << [t_nick, t_data[:today]]
+                end
+              end
+            end
+          end
+          data.sort {|a, b| b.last <=> a.last }
         end
 
         def self.save_state(today)
