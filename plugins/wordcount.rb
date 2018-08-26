@@ -15,25 +15,6 @@ module CataBot
           property :words, Integer, default: 0
         end
 
-        CataBot.finalizer(:wordcount) do
-          today = Date.today
-          @@top_mutex.synchronize do
-            @@counters.each_pair do |chan, h1|
-              h1.each_pair do |nick, data|
-                record = Counter.first(channel: chan, nick: nick, date: today)
-                if record
-                  record.words = data[:today]
-                else
-                  record = Counter.new(channel: chan, nick: nick, date: today, words: data[:today])
-                end
-                unless record.save
-                  CataBot.log :error, "WordCount: Error saving record: #{record}!"
-                end
-              end
-            end
-          end
-        end
-
         @@top_mutex = Mutex.new
         @@counters = Hash.new do |h1, chan|
           h1[chan] = Hash.new do |h2, nick|
@@ -61,6 +42,34 @@ module CataBot
             data = @@counters[m.channel][m.user.nick]
             data[:mutex].synchronize { m.reply data, true }
           end
+        end
+
+        def self.save_state(today)
+          @@top_mutex.synchronize do
+            @@counters.each_pair do |chan, h1|
+              h1.each_pair do |nick, data|
+                record = Counter.first(channel: chan, nick: nick, date: today)
+                if record
+                  record.words = data[:today]
+                else
+                  record = Counter.new(channel: chan, nick: nick, date: today, words: data[:today])
+                end
+                unless record.save
+                  CataBot.log :error, "WordCount: Error saving record: #{record}!"
+                end
+              end
+            end
+          end
+        end
+
+        CataBot.aux_thread_midnight(:wordcount) do
+          stamp = Time.now.utc
+          stamp -= 24*60*60 if stamp.hour = 0
+          IRC.save_state(stamp.to_date)
+        end
+
+        CataBot.finalizer(:wordcount) do
+          IRC.save_state(Time.now.utc.to_date)
         end
       end
     end
