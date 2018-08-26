@@ -57,6 +57,8 @@ module CataBot
                 unless record.save
                   CataBot.log :error, "WordCount: Error saving record: #{record}!"
                 end
+                data[:past] += data[:today]
+                data[:today] = 0
               end
             end
           end
