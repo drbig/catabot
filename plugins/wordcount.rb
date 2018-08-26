@@ -11,14 +11,14 @@ module CataBot
 
           property :channel, String, key: true
           property :nick, String, key: true
-          property :date, Date, default: Proc.new { Date.today }
+          property :date, Date, default: Proc.new { Time.now.utc.to_date }
           property :words, Integer, default: 0
         end
 
         @@top_mutex = Mutex.new
         @@counters = Hash.new do |h1, chan|
           h1[chan] = Hash.new do |h2, nick|
-            today = Date.today
+            today = Time.now.utc.to_date
             past_words = Counter.all(:channel => chan, :nick => nick, :date.lt => today).sum(:words) || 0
             today_words = Counter.all(channel: chan, nick: nick, date: today).sum(:words) || 0
             h2[nick] = {today: today_words, past: past_words, mutex: Mutex.new}
