@@ -35,7 +35,7 @@ module CataBot
         end
 
         HELP = 'Can do: words place (nick), words ttop10, words top10'
-        command(:words, /words ?(\w+) ?(\S+)?$/, 'words [...]', HELP)
+        command(:words, /words ?(\w+) ?(.*)?$/, 'words [...]', HELP)
         def words(m, cmd, rest)
           if !m.channel? && cmd != 'help'
             m.reply 'Use on a channel', true
@@ -46,7 +46,7 @@ module CataBot
             m.reply HELP, true
           when 'place'
             data = get_ranking(m.channel)
-            nick = rest || m.user.nick
+            nick = (rest || m.user.nick).strip
             place = data.find_index {|e| e.first == nick}
             if !place
               m.reply "Sorry, don't know #{nick}...", true
