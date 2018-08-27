@@ -54,14 +54,22 @@ module CataBot
             end
             words = data[place].last
             m.reply "#{nick} is \##{place+1} (with #{words} words) out of #{data.length}"
+          when 'ttop10'
+            data = @@top_mutex.synchronize do
+              @@counters[m.channel].each_pair.map {|k, v| [k, v[:today]] }.sort {|a, b| b.last <=> a.last }
+            end
+            m.reply "Today top 10: #{format_top10(data)}"
           when 'top10'
             data = get_ranking(m.channel)
-            msg = data[0..9].each_with_index.map {|(nick, count), idx| "#{idx+1}. #{nick} (#{count})" }.join(', ')
-            m.reply "Overall top 10: #{msg}"
+            m.reply "Overall top 10: #{format_top10(data)}"
           when 'debug'
             data = @@counters[m.channel][m.user.nick]
             data[:mutex].synchronize { m.reply data, true }
           end
+        end
+
+        def format_top10(data)
+           data[0..9].each_with_index.map {|(nick, count), idx| "#{idx+1}. #{nick} (#{count})" }.join(', ')
         end
 
         def get_ranking(chan)
