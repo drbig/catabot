@@ -78,9 +78,10 @@ module CataBot
             CataBot.log :debug, @@counters.to_s
             chan = m.channel
             nick = (rest || m.user.nick).strip
-            unless @@counters[chan].has_key? nick
-              m.reply "Sorry, don't know #{nick}...", true
-              return
+            @@top_mutex.synchronize do
+              unless @@counters[chan].has_key? nick
+                m.reply "Sorry, don't know #{nick}...", true
+                return
             end
             data = @@counters[chan][nick]
             data[:mutex].synchronize { m.reply data, true }
