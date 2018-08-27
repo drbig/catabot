@@ -90,19 +90,23 @@ module CataBot
           data.sort {|a, b| b.last <=> a.last }
         end
 
+        def self.update_user_record(chan, nick, today, counter)
+          record = Counter.first(channel: chan, nick: nick, date: today)
+          if record
+            record.words = counter
+          else
+            record = Counter.new(channel: chan, nick: nick, date: today, words: counter)
+          end
+          unless record.save
+            CataBot.log :error, "WordCount: Error saving record: #{record}!"
+          end
+        end
+
         def self.save_state(today)
           @@top_mutex.synchronize do
             @@counters.each_pair do |chan, h1|
               h1.each_pair do |nick, data|
-                record = Counter.first(channel: chan, nick: nick, date: today)
-                if record
-                  record.words = data[:today]
-                else
-                  record = Counter.new(channel: chan, nick: nick, date: today, words: data[:today])
-                end
-                unless record.save
-                  CataBot.log :error, "WordCount: Error saving record: #{record}!"
-                end
+                IRC.update_user_record(chan, nick, today, data[:today])
                 data[:today] = 0
               end
             end
