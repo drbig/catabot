@@ -5,6 +5,7 @@ module CataBot
 
       class IRC
         MIN_WORD_LENGTH = 3  # in characters, prevent "s u c h  c h e a t s"
+        PENALTIES = {penalty_place: 1.7, penalty_top: 2.2}
 
         include CataBot::IRC::Plugin
 
@@ -23,7 +24,7 @@ module CataBot
           h1[chan] = Hash.new do |h2, nick|
             today = Time.now.utc.to_date
             today_words = Counter.all(channel: chan, nick: nick, date: today).sum(:words) || 0
-            h2[nick] = {today: today_words, mutex: Mutex.new}
+            h2[nick] = {today: today_words, penalty_place: 1.0, penalty_top: 1.0, mutex: Mutex.new}
           end
         end
 
@@ -59,6 +60,7 @@ module CataBot
           when 'help'
             m.reply HELP, true
           when 'place'
+            return unless penalty_check(:penalty_place, m)
             data = get_ranking(m.channel)
             nick = (rest || m.user.nick).strip
             place = data.find_index {|e| e.first == nick}
@@ -69,11 +71,13 @@ module CataBot
             words = data[place].last
             m.reply "#{nick} is \##{place+1} (with #{words} words) out of #{data.length}"
           when 'ttop10'
+            return unless penalty_check(:penalty_top, m)
             data = @@top_mutex.synchronize do
               @@counters[m.channel].each_pair.map {|k, v| [k, v[:today]] }.sort {|a, b| b.last <=> a.last }
             end
             m.reply "Today top 10: #{format_top10(data)}"
           when 'top10'
+            return unless penalty_check(:penalty_top, m)
             data = get_ranking(m.channel)
             m.reply "Overall top 10: #{format_top10(data)}"
           when 'debug'
@@ -88,6 +92,23 @@ module CataBot
             end
             data = @@counters[chan][nick]
             data[:mutex].synchronize { m.reply data, true }
+          end
+        end
+
+        def penalty_check(type, m)
+          chan = m.channel
+          nick = m.user.nick
+          return unless @@counters[chan].has_key? nick
+          data = @@counters[chan][nick]
+          data[:mutex].synchronize do
+            new_penalty = data[type] * PENALTIES[type]
+            penalty_words = new_penalty.floor
+            return false if penalty_words > data[:today]
+
+            m.reply "Cost of checking is #{penalty_words} word(s)", true
+            data[type] = new_penalty
+            data[:today] -= penalty_words
+            true
           end
         end
 
@@ -131,6 +152,7 @@ module CataBot
               h1.each_pair do |nick, data|
                 IRC.update_user_record(chan, nick, today, data[:today])
                 data[:today] = 0
+                PENALTIES.each_key {|k| data[k] = 1.0 }
               end
             end
           end
