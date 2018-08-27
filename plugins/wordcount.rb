@@ -9,9 +9,10 @@ module CataBot
         class Counter
           include DataMapper::Resource
 
-          property :channel, String, key: true
-          property :nick, String, key: true
-          property :date, Date, default: Proc.new { Time.now.utc.to_date }
+          property :id, Serial
+          property :channel, String, required: true
+          property :nick, String, required: true
+          property :date, Date, default: Proc.new { Time.now.utc.to_date }, required: true
           property :words, Integer, default: 0
         end
 
