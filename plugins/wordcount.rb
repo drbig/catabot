@@ -20,9 +20,8 @@ module CataBot
         @@counters = Hash.new do |h1, chan|
           h1[chan] = Hash.new do |h2, nick|
             today = Time.now.utc.to_date
-            past_words = Counter.all(:channel => chan, :nick => nick, :date.lt => today).sum(:words) || 0
             today_words = Counter.all(channel: chan, nick: nick, date: today).sum(:words) || 0
-            h2[nick] = {today: today_words, past: past_words, mutex: Mutex.new}
+            h2[nick] = {today: today_words, mutex: Mutex.new}
           end
         end
 
@@ -96,7 +95,6 @@ module CataBot
                 unless record.save
                   CataBot.log :error, "WordCount: Error saving record: #{record}!"
                 end
-                data[:past] += data[:today]
                 data[:today] = 0
               end
             end
