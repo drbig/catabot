@@ -47,7 +47,7 @@ module CataBot
         end
 
         HELP = 'Can do: words place (nick), words ttop10, words top10'
-        command(:words, /words ?(\w+) ?(.*)?$/, 'words [...]', HELP)
+        command(:words, /words ?(\w+) ?(.+)?$/, 'words [...]', HELP)
         def words(m, cmd, rest)
           if !m.channel? && cmd != 'help'
             m.reply 'Use on a channel', true
