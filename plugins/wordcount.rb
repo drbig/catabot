@@ -75,7 +75,14 @@ module CataBot
             data = get_ranking(m.channel)
             m.reply "Overall top 10: #{format_top10(data)}"
           when 'debug'
-            data = @@counters[m.channel][m.user.nick]
+            CataBot.log :debug, @@counters.to_s
+            chan = m.channel
+            nick = (rest || m.user.nick).strip
+            unless @@counters[chan].has_key? nick
+              m.reply "Sorry, don't know #{nick}...", true
+              return
+            end
+            data = @@counters[chan][nick]
             data[:mutex].synchronize { m.reply data, true }
           end
         end
