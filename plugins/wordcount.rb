@@ -34,6 +34,18 @@ module CataBot
           data[:mutex].synchronize { data[:today] += word_count }
         end
 
+        listen_to :leaving, method: :leaving
+        def leaving(m, user)
+          chan = m.channel
+          nick = (user || m.user).nick
+          @@top_mutex.synchronize do
+            return unless @@counters[chan].has_key? nick
+            today = Time.now.utc.to_date
+            IRC.update_user_record(chan, nick, today, @@counters[chan][nick][:today])
+            @@counters[chan].delete(nick)
+          end
+        end
+
         HELP = 'Can do: words place (nick), words ttop10, words top10'
         command(:words, /words ?(\w+) ?(.*)?$/, 'words [...]', HELP)
         def words(m, cmd, rest)
