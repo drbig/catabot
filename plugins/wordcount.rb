@@ -84,6 +84,7 @@ module CataBot
               unless @@counters[chan].has_key? nick
                 m.reply "Sorry, don't know #{nick}...", true
                 return
+              end
             end
             data = @@counters[chan][nick]
             data[:mutex].synchronize { m.reply data, true }
