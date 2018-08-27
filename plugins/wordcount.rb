@@ -35,7 +35,7 @@ module CataBot
         end
 
         HELP = 'Can do: words place (nick), words ttop10, words top10'
-        command(:words, /words ?(\w+) ?(\w+)?\s*?$/, 'words [...]', HELP)
+        command(:words, /words ?(\w+) ?(\S+)?$/, 'words [...]', HELP)
         def words(m, cmd, rest)
           if !m.channel? && cmd != 'help'
             m.reply 'Use on a channel', true
@@ -53,7 +53,7 @@ module CataBot
               return
             end
             words = data[place].last
-            m.reply "#{nick} is \##{place+1} (with #{words} word(s))"
+            m.reply "#{nick} is \##{place+1} (with #{words} words) out of #{data.length}"
           when 'top10'
             data = get_ranking(m.channel)
             msg = data[0..9].each_with_index.map {|(nick, count), idx| "#{idx+1}. #{nick} (#{count})" }.join(', ')
