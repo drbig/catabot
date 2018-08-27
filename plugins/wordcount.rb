@@ -4,6 +4,8 @@ module CataBot
     module WordCount
 
       class IRC
+        MIN_WORD_LENGTH = 3  # in characters, prevent "s u c h  c h e a t s"
+
         include CataBot::IRC::Plugin
 
         class Counter
@@ -29,7 +31,7 @@ module CataBot
         def input(m)
           return unless m.channel?
           nick = m.user.nick
-          word_count = m.message.split.length
+          word_count = m.message.split.reject {|w| w.length < MIN_WORD_LENGTH}.length
           data = @@counters[m.channel][m.user.nick]
           data[:mutex].synchronize { data[:today] += word_count }
         end
