@@ -160,7 +160,7 @@ module CataBot
 
         CataBot.aux_thread_midnight(:wordcount) do
           stamp = Time.now.utc
-          stamp -= 24*60*60 if stamp.hour = 0
+          stamp -= 24*60*60 if stamp.hour == 0
           IRC.save_state(stamp.to_date)
         end
 
