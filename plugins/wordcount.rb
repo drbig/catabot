@@ -101,13 +101,11 @@ module CataBot
           return unless @@counters[chan].has_key? nick
           data = @@counters[chan][nick]
           data[:mutex].synchronize do
-            new_penalty = data[type] * PENALTIES[type]
-            penalty_words = new_penalty.floor
+            penalty_words = data[type].floor
             return false if penalty_words > data[:today]
-
             m.reply "Cost of checking is #{penalty_words} word(s)", true
-            data[type] = new_penalty
             data[:today] -= penalty_words
+            data[type] *= PENALTIES[type]
             true
           end
         end
