@@ -1,11 +1,9 @@
-
 module CataBot
   module Plugin
     module WordCount
-
       class IRC
         MIN_WORD_LENGTH = 3  # in characters, prevent "s u c h  c h e a t s"
-        PENALTIES = {penalty_place: 1.7, penalty_top: 2.2}
+        PENALTIES = {penalty_place: 1.7, penalty_top: 2.2}  # ensure exp growth
 
         include CataBot::IRC::Plugin
 
