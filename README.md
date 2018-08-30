@@ -4,6 +4,8 @@ A plugin-based IRC bot framework that also provides easy Web interfaces and peri
 
 Current status: *works great*
 
+**README is outdated as of 2018-08-30**, we have more plugins now!
+
 Configuration is done via a single [YAML](http://yaml.org/) file, see `example.yaml`.
 
 Requires at least modern [Ruby](https://www.ruby-lang.org/en/), a bunch of GEMs (see `Gemfile`) and some database ([SQLite](https://www.sqlite.org/) will do too). Exact dependencies depend on which plugins you want to use.
