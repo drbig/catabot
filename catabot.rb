@@ -183,6 +183,7 @@ module CataBot
                 now = Time.now.utc
                 sleep_for = (24 * 60 * 60) - (now.hour * 60 * 60 + now.min * 60 + now.sec)
               end
+              CataBot.log :debug, "Aux thread #{k} sleeping for #{sleep_for}..."
               sleep(sleep_for)
               CataBot.log :debug, "Running #{k} aux thread..."
               v[:block].call
