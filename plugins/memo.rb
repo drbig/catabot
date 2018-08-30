@@ -144,7 +144,7 @@ module CataBot
           end
         end
 
-        CataBot.aux_thread(:memo_expire, 4 * 60 * 60) do
+        CataBot.aux_thread_every(:memo_expire, 4 * 60 * 60) do
           threshold = Chronic.parse(EXPIRE + ' ago').to_datetime
           expired = Note.all(:stamp.lt => threshold)
           deleted = 0

@@ -104,7 +104,7 @@ module CataBot
           end
         end
 
-        CataBot.aux_thread(:jq_expire, 5 * 60) do
+        CataBot.aux_thread_every(:jq_expire, 5 * 60) do
           threshold = Chronic.parse(EXPIRE + ' ago')
           deleted = 0
           @@results.each_pair do |k, v|
