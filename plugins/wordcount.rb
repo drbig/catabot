@@ -81,6 +81,7 @@ module CataBot
             data = get_ranking(m.channel)
             m.reply "Overall top 10: #{format_top10(data)}"
           when 'debug'
+            return unless CataBot::IRC::Plugin::ADMIN.match(m.user.mask)
             CataBot.log :debug, @@counters.to_s
             chan = m.channel
             nick = (rest || m.user.nick).strip
