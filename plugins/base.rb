@@ -61,7 +61,6 @@ module CataBot
 
         listen_to :connect, method: :setup
         def setup(m)
-          User('Nickserv').send("IDENTIFY #{CataBot.config['irc']['pass']}")
           # FIXME: This seems to run independent of the channels to join
           #        from the main config (c['irc']['channels']), so for channels
           #        that require being identified... well, you will or won't
@@ -71,6 +70,7 @@ module CataBot
           #
           # TODO: if we can't get our config nick die or update the config...
           # Should handle underscores now.
+          admin_reauth(true)
         end
 
         command(:version, /version$/, 'version', 'Tells you the version')
@@ -128,6 +128,12 @@ module CataBot
         command(:admin_renick, /renick (.+)$/)
         def admin_renick(m, arg)
           CataBot.bot.nick = arg if ADMIN.match(m.user.mask)
+        end
+
+        command(:admin_reauth, /reauth$/)
+        def admin_reauth(m)
+          # NOTE: Export the bot's name to config? Make this parametrized?
+          User('Nickserv').send("IDENTIFY #{CataBot.config['irc']['pass']}") if m.is_a? TrueClass or ADMIN.match(m.user.mask)
         end
 
         command(:admin_gc, /run_gc$/)
