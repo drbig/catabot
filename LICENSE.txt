@@ -1,4 +1,4 @@
-Copyright (c) 2015 - 2018, Piotr S. Staszewski
+Copyright (c) 2015 - 2019, Piotr S. Staszewski
 CopperTube image Copyright (c) 2015, Sean "Chezzo" Osman
 All rights reserved.
 
