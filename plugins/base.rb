@@ -12,6 +12,7 @@ module CataBot
       end
 
       module Methods
+        # NOTE: Make an admin_command helper that checks if admin?
         def command(meth, rexp, name = nil, desc = nil)
           CataBot::IRC.cmd(name, desc) if name && desc
           match(rexp, method: meth, react_on: :channel)
