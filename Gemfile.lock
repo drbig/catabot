@@ -29,7 +29,7 @@ GEM
       tool (~> 0.2)
     nokogiri (1.8.4)
       mini_portile2 (~> 2.3.0)
-    rack (1.6.10)
+    rack (1.6.12)
     thin (1.6.3)
       daemons (~> 1.0, >= 1.0.9)
       eventmachine (~> 1.0)
