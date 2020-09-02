@@ -110,7 +110,7 @@ module CataBot
         end
 
         def format_top10(data)
-           data[0..9].each_with_index.map {|(nick, count), idx| "#{idx+1}. #{nick} (#{count})" }.join(', ')
+          data[0..9].select {|(_, count)| count > 0 }.each_with_index.map {|(nick, count), idx| "#{idx+1}. #{nick} (#{count})" }.join(', ')
         end
 
         def get_ranking(chan)
