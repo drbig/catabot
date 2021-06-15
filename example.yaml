@@ -60,6 +60,8 @@ irc:
   realname: I'm a robot. Trouble? Ask dRbiG.
   user: catabot
   pass: password
+  sasl_user: drbig
+  sasl_password: password
   server: chat.freenode.net
   channels:
     - '#catabot-tests'

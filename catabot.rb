@@ -152,6 +152,9 @@ module CataBot
         b.server    = c['irc']['server']
         b.channels  = c['irc']['channels']
 
+        b.sasl.username = CataBot.config['irc']['sasl_user'] if CataBot.config['irc'].has_key? 'sasl_user'
+        b.sasl.password = CataBot.config['irc']['sasl_password'] if CataBot.config['irc'].has_key? 'sasl_password'
+
         b.plugins.plugins = c['plugins'].map {|p| CataBot::Plugin.const_get(p).const_get('IRC') }
       end
     end
