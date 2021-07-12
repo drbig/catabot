@@ -1,7 +1,8 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    addressable (2.3.8)
+    addressable (2.8.0)
+      public_suffix (>= 2.0.2, < 5.0)
     chronic (0.10.2)
     cinch (2.2.5)
     daemons (1.2.2)
@@ -31,6 +32,7 @@ GEM
     nokogiri (1.11.4)
       mini_portile2 (~> 2.5.0)
       racc (~> 1.4)
+    public_suffix (4.0.6)
     racc (1.5.2)
     rack (1.6.12)
     temple (0.8.2)
